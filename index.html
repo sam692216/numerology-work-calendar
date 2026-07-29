@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="阿福教練專為保險業務員打造的工作曆，順應宇宙流日能量，讓開發、增員、服務、成交更有節奏！">
+    <title>職場紅綠燈-時機管理術 | 阿福教練</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#1e3a8a', 
+                        secondary: '#d97706', 
+                        accent: '#f59e0b',
+                        surface: '#f8fafc',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+        .day-cell { transition: all 0.2s ease; }
+        .day-cell:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased font-sans p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <header class="text-center mb-8 flex flex-col items-center">
+            <div class="mb-5 relative">
+                <div class="absolute inset-0 bg-gradient-to-tr from-secondary to-primary rounded-full blur opacity-50"></div>
+                <img src="https://share.crm945.com/images/2026/04/09/messageImage_1770878818976.jpg" alt="阿福教練" class="relative w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-white shadow-xl object-cover">
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold text-primary mb-3">
+                <i class="fa-solid fa-traffic-light mr-2 text-secondary"></i>職場紅綠燈 - 時機管理術
+            </h1>
+            <p class="text-slate-700 font-medium md:text-lg max-w-2xl mx-auto bg-white/50 backdrop-blur-sm py-2 px-4 rounded-full shadow-sm border border-slate-200/50">
+                阿福教練專為保險業務員打造，順應宇宙流日能量，讓<span class="text-rose-600 font-bold">開發</span>、<span class="text-amber-600 font-bold">增員</span>、<span class="text-teal-600 font-bold">服務</span>、<span class="text-primary font-bold">成交</span>更有節奏！
+            </p>
+        </header>
+
+        <div class="glass-panel rounded-2xl p-6 md:p-8 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6 items-end">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1" for="agentName">您的暱稱 (選填)</label>
+                    <input type="text" id="agentName" placeholder="例如：阿福" class="w-full rounded-lg border-slate-300 border p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1" for="birthMonth">您的生日 (月)</label>
+                    <select id="birthMonth" class="w-full rounded-lg border-slate-300 border p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                        <option value="">選擇月份</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1" for="birthDay">您的生日 (日)</label>
+                    <select id="birthDay" class="w-full rounded-lg border-slate-300 border p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                        <option value="">選擇日期</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1" for="targetMonth">查詢月份</label>
+                    <input type="month" id="targetMonth" class="w-full rounded-lg border-slate-300 border p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                </div>
+            </div>
+            <button id="generateBtn" class="w-full bg-primary hover:bg-blue-800 text-white font-bold py-3 px-4 rounded-lg transition duration-300 shadow-md hover:shadow-lg flex items-center justify-center text-lg">
+                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> 產出專屬工作曆
+            </button>
+            <div id="errorMsg" class="hidden mt-4 text-red-500 text-sm font-medium text-center">
+                <i class="fa-solid fa-circle-exclamation mr-1"></i> 請填寫完整的生日資訊！
+            </div>
+        </div>
+
+        <div id="resultSection" class="hidden opacity-0 transition-opacity duration-500">
+            <div class="flex justify-end mb-4">
+                <button id="exportMonthBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow transition flex items-center">
+                    <i class="fa-regular fa-calendar-plus mr-2"></i> 將本月行程匯入日曆 (.ics)
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="glass-panel rounded-xl p-5 border-l-4 border-primary flex items-center">
+                    <div class="rounded-full bg-blue-100 text-primary w-12 h-12 flex items-center justify-center text-xl font-bold mr-4">
+                        <span id="displayPersonalYear"></span>
+                    </div>
+                    <div>
+                        <h3 class="text-sm text-slate-500 font-semibold">您的本年流年</h3>
+                        <p class="text-lg font-bold text-slate-800" id="yearDesc">年度主軸</p>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-xl p-5 border-l-4 border-secondary flex items-center">
+                    <div class="rounded-full bg-amber-100 text-secondary w-12 h-12 flex items-center justify-center text-xl font-bold mr-4">
+                        <span id="displayPersonalMonth"></span>
+                    </div>
+                    <div>
+                        <h3 class="text-sm text-slate-500 font-semibold">本月流月</h3>
+                        <p class="text-lg font-bold text-slate-800" id="monthDesc">本月核心焦點</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-2xl overflow-hidden shadow-lg mb-8">
+                <div class="bg-primary text-white text-center py-4 relative">
+                    <h2 id="calendarTitle" class="text-2xl font-bold">工作曆</h2>
+                </div>
+                <div class="p-4 md:p-6">
+                    <div class="grid grid-cols-7 gap-1 md:gap-2 mb-2">
+                        <div class="text-center font-bold text-red-500 text-xs md:text-sm py-2">日</div>
+                        <div class="text-center font-bold text-slate-600 text-xs md:text-sm py-2">一</div>
+                        <div class="text-center font-bold text-slate-600 text-xs md:text-sm py-2">二</div>
+                        <div class="text-center font-bold text-slate-600 text-xs md:text-sm py-2">三</div>
+                        <div class="text-center font-bold text-slate-600 text-xs md:text-sm py-2">四</div>
+                        <div class="text-center font-bold text-slate-600 text-xs md:text-sm py-2">五</div>
+                        <div class="text-center font-bold text-slate-600 text-xs md:text-sm py-2">六</div>
+                    </div>
+                    <div id="calendarGrid" class="grid grid-cols-7 gap-1 md:gap-2"></div>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-6 mb-8">
+                <h3 class="text-xl font-bold text-primary mb-4 border-b pb-2 flex items-center justify-between">
+                    <span><i class="fa-solid fa-book-open mr-2"></i> 9日循環保險實務指南</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="legendContainer">
+                    <div id="legendSolo" class="bg-teal-50/50 p-4 rounded-xl border border-teal-100">
+                        <h4 class="text-lg font-bold text-teal-700 mb-3 flex items-center"><i class="fa-solid fa-user-astronaut mr-2"></i> 獨處與整備</h4>
+                        <p class="text-xs text-teal-600 mb-3 font-medium">適合：研究、學習、檢討、修復、斷捨離</p>
+                        <div class="space-y-3" id="listSolo"></div>
+                    </div>
+                    <div id="legendSocial" class="bg-amber-50/50 p-4 rounded-xl border border-amber-100">
+                        <h4 class="text-lg font-bold text-amber-700 mb-3 flex items-center"><i class="fa-solid fa-mug-hot mr-2"></i> 社交與連結</h4>
+                        <p class="text-xs text-amber-600 mb-3 font-medium">適合：轉介紹、跨界交流、資訊分享</p>
+                        <div class="space-y-3" id="listSocial"></div>
+                    </div>
+                    <div id="legendClose" class="bg-rose-50/50 p-4 rounded-xl border border-rose-100">
+                        <h4 class="text-lg font-bold text-rose-700 mb-3 flex items-center"><i class="fa-solid fa-file-signature mr-2"></i> 收單與衝刺</h4>
+                        <p class="text-xs text-rose-600 mb-3 font-medium">適合：促成、理性分析、簽約、增員合夥</p>
+                        <div class="space-y-3" id="listClose"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dayModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto transform scale-95 transition-transform duration-300" id="modalContent">
+            <div id="modalHeader" class="relative p-6 text-white text-center transition-colors duration-300">
+                <button id="closeModal" aria-label="關閉" class="absolute top-4 right-4 text-white/80 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/20 backdrop-blur-md mb-3 text-3xl font-bold border-2 border-white/30">
+                    <span id="modalNumber">1</span>
+                </div>
+                <h2 id="modalDate" class="text-lg font-medium opacity-90 mb-1"></h2>
+                <div class="flex justify-center gap-2 mb-2">
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm border border-white/30 shadow-sm">流月 <span id="modalPMonth"></span></span>
+                    <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm border border-white/30 shadow-sm">流日 <span id="modalPDay"></span></span>
+                </div>
+                <h3 id="modalTitle" class="text-2xl font-bold"></h3>
+                <p id="modalSubtitle" class="text-sm opacity-75 mt-1 font-medium tracking-wide"></p>
+                <div id="modalAgentGreeting" class="text-sm font-medium mt-2 bg-white/20 inline-block px-3 py-1 rounded-full hidden"></div>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <h4 class="font-bold text-slate-700 border-l-4 border-secondary pl-2 mb-2">🎯 今日核心目標</h4>
+                    <p id="modalGoal" class="text-slate-600 leading-relaxed text-sm md:text-base"></p>
+                </div>
+                <div class="mb-4">
+                    <h4 class="font-bold text-slate-700 border-l-4 border-primary pl-2 mb-2">📋 建議行動清單</h4>
+                    <ul id="modalActionList" class="list-disc pl-5 text-slate-600 text-sm md:text-base space-y-1"></ul>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-100 mb-4">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">💡 能量提醒</h4>
+                    <p id="modalTip" class="text-sm text-slate-700 italic"></p>
+                </div>
+                <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 mb-4">
+                    <h4 class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-2">🔥 今日能量金句</h4>
+                    <p id="modalTagline" class="text-sm text-amber-700 font-semibold mb-2 leading-snug"></p>
+                    <p id="modalQuote" class="text-sm text-slate-600 italic leading-relaxed"></p>
+                </div>
+                <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 mb-4">
+                    <h4 class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-3">🧭 夜間 21:00 執行檢視</h4>
+                    <div id="modalChecklist" class="space-y-2"></div>
+                </div>
+                <div class="mt-4 flex justify-center">
+                    <button id="exportDayBtn" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-medium py-3 px-4 rounded-lg shadow transition flex items-center justify-center">
+                        <i class="fa-regular fa-calendar-check mr-2"></i> 將今日主題加入日曆
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 設定後台記錄的 API 網址 (從您的 GAS 部署取得)
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxM1mV8xhMLrlI1zZ_2OWpPaegD09KqqR5VWn0khrnVSYipvCnrosWqMYR6pFi7sPzE/exec"; 
+
+        const workflowData = {
+            1: { name: "破局與開創日", subtitle: "舒適圈粉碎", short: "破局", group: "solo", color: "bg-red-50 text-red-700 border-red-200", borderColor: "border-red-200", textColor: "text-red-600", modalClass: "bg-gradient-to-r from-red-600 to-red-500", icon: "fa-seedling",
+                goal: "拒絕低效雜務，專注於啟動全新計畫，勇敢聯繫平時不敢打的指標性「魔王客戶」或「頂級合夥人」。",
+                actions: ["上午行程 (理性築底)：進辦公室安靜研究最新險種、理財條款或上課充實，並在行事曆寫下9天後的終極目標。", "下午行程 (大膽播種)：聯繫平時不敢打的「魔王級客戶」或「頂級增員對象」，重點在約出見面機會。"],
+                tip: "眼前的機會絕不猶豫，客戶有興趣就立刻定下時間，今天必須拿出勇氣獨立出擊。",
+                tagline: "不用等待許可，今天你就是自己生命中最強大的貴人！",
+                quote: "「在猶豫中等待機會，不如用勇敢劈開第一道曙光！今天不設限，我的獨立與果斷，就是最強大的開創磁場。」",
+                checklist: ["今天我有沒有打通那通平時最不敢打的突破電話？", "面對客戶或合作夥伴，我有沒有當機立斷「定下具體時間」？"] },
+            2: { name: "借力與傾聽日", subtitle: "溫柔凝聚力", short: "借力", group: "social", color: "bg-amber-50 text-amber-700 border-amber-200", borderColor: "border-amber-200", textColor: "text-amber-600", modalClass: "bg-gradient-to-r from-amber-500 to-yellow-500", icon: "fa-handshake-angle",
+                goal: "實施二八法則（80% 傾聽、20% 提問），不強攻促成；約老客戶或死黨聊感情，在情感連結最強時大膽尋求轉介紹。",
+                actions: ["上午行程 (敏銳觀察)：見客戶時多聽少說，暫緩強攻；增員面談時改以「尋找事業合夥人」的感性角度來談。", "下午行程 (啟動轉介紹)：約老客戶或死黨喝咖啡聯絡感情，不聊商品，在情感連結最強時大膽要求轉介紹名單。", "傍晚行程 (形象升級)：剪髮、添購服裝，打造讓人安心的專業形象，並安靜寫日記修正自己的缺點。"],
+                tip: "保持敏銳觀察，建立情感連結。今天是尋求合作與轉介紹的最佳時機。",
+                tagline: "收起鋒芒、張開雙耳。學會借力，才是最高明的大格局。",
+                quote: "「平時靠實力，今天靠魅力與聽力。縮小自己、放大對方，用最高級的溫柔凝聚全宇宙的人脈複利！」",
+                checklist: ["面對客戶時，我有沒有忍住想立刻推銷的衝動，好好把話聽完？", "今天我有沒有真誠表達感謝，並向信任的老客戶開口要求轉介紹？", "面對不同意見時，我是先反駁還是先展現同理心說「我懂你的意思」？"] },
+            3: { name: "表達與促成日", subtitle: "創意渲染力", short: "促成", group: "close", color: "bg-green-50 text-green-700 border-green-200", borderColor: "border-green-200", textColor: "text-green-600", modalClass: "bg-gradient-to-r from-green-500 to-emerald-400", icon: "fa-hashtag",
+                goal: "將「只差臨門一腳」的案子排在今天，用故事與歡樂感染對方大膽促成；花 15 分鐘用新點子或幽默訊息打破卡關難題。",
+                actions: ["全天行程 (創意收單)：將「只差臨門一腳」的關鍵客戶或增員對象排在今天，用樂觀幽默的能量感染對方，大膽促成簽約。", "下午行程 (難題破局)：花15分鐘腦力激盪，用新點子或幽默訊息去突破卡關的申訴件或名單。", "晚上行程 (快樂社交)：下班後去參加社團聚會或與朋友聚餐，經營人氣桃花；並記得留一小時給自己，做喜歡的事充飽電。"],
+                tip: "展現樂觀幽默的能量，用創意突破難關，今天是發光發熱與大膽促成的好日子。",
+                tagline: "用創意的糖衣，包裹理性的專業；你的快樂就是最強大的促成力！",
+                quote: "「不嚴肅、不糾結！今天我是自己舞台的發表者，用最陽光的笑容去利他，把熱情化為現實的黃金成果。」",
+                checklist: ["今天我有沒有釋放樂觀、喜悅的能量大膽提議「今天就定下來/簽約」？", "面對卡關或拒絕，我有沒有用幽默新穎的點子去嘗試破局？", "今晚有沒有留出一小時絕對不碰工作，做自己打從心底喜歡的事？"] },
+            4: { name: "務實與扎根日", subtitle: "信任落地方案", short: "扎根", group: "close", color: "bg-green-50 text-green-700 border-green-200", borderColor: "border-green-200", textColor: "text-green-600", modalClass: "bg-gradient-to-r from-emerald-500 to-green-500", icon: "fa-file-signature",
+                goal: "安排重視邏輯的客戶，拿出圖表數據做保單健診與精準簽約；進辦公室實施減法大掃除，清空待辦事項與歸檔資料。",
+                actions: ["全天行程 (專業談單)：安排重視邏輯的理性客戶，拿出數據與圖表進行保單健診、費率說明與正式簽約。", "下午行程 (重整秩序)：進辦公室清空待辦事項，如完成建議書、歸檔資料；專注關心老客戶與做售後服務，暫停盲目開拓新環境。"],
+                tip: "社交上講求冷靜與誠信，答應的事精準做到，不給模糊承諾。",
+                tagline: "不給模糊承諾，答應的事精準做到；用無懈可擊的數據築起護城河！",
+                quote: "「今天不浮誇、不浮躁！用最扎實的白紙黑字與售後服務，將善緣化為最讓人安心的終身制度。」",
+                checklist: ["今天面對客戶時，我有沒有拿出扎實的數據與理性對比圖表？", "待辦事項、歸檔資料與辦公桌環境，今天是否有確實清空？", "答應別人的事（包括回報進度），我有沒有精準做到且不留模糊空間？"] },
+            5: { name: "跨界與突破日", subtitle: "打破舒適圈", short: "擴張", group: "social", color: "bg-amber-50 text-amber-700 border-amber-200", borderColor: "border-amber-200", textColor: "text-amber-600", modalClass: "bg-gradient-to-r from-yellow-500 to-amber-500", icon: "fa-car",
+                goal: "走入全新高階商圈或異業場合，拋出「高格局提案（合夥/大額資產）」；社群發布顛覆思維的含金量文章，打破大眾刻板印象。",
+                actions: ["上午行程 (校準核心)：花10分鐘寫下這9天的核心突破目標，今天的所有拜訪都要扣緊此目標，拒絕無效瞎忙。", "中午/傍晚 (社群發聲)：在社群發布含金量高的專業文章或理賠故事，打廣告做行銷。", "下午行程 (大膽擴張)：參加新商會、異業合作結交新友；面談時大膽拋出高格局提案（大額保單或高階合夥）。"],
+                tip: "拒絕無效瞎忙，大膽打破現狀。拋出高格局提案，今天是自由擴張版圖的時刻。",
+                tagline: "守成就是最大的風險！帶著破局之翼，讓遠大願景飛越限制。",
+                quote: "「拒絕無效瞎忙，大膽打破現狀！今天我不設限，我的勇敢與跨界，就是最強大的擴張磁場。」",
+                checklist: ["今天我有沒有緊扣核心目標，勇敢對無效社交與瑣碎雜務說「不」？", "我今天有沒有主動走向新環境、接觸新朋友或拋出挑戰性提案？", "晚上有沒有體驗新事物（走新路、吃異國料理），幫大腦注入創新靈感？"] },
+            6: { name: "擔當與修復日", subtitle: "智慧與大愛", short: "修復", group: "solo", color: "bg-red-50 text-red-700 border-red-200", borderColor: "border-red-200", textColor: "text-red-600", modalClass: "bg-gradient-to-r from-red-500 to-rose-500", icon: "fa-gift",
+                goal: "主動挑出最複雜拖延的理賠申訴件，一肩扛起責任解決問題；陪伴核心夥伴與 VIP 不談業績，只做高質量靈魂傾聽與關懷。",
+                actions: ["全天行程 (清理沉痾)：處理拖延已久的複雜理賠件或刁鑽客戶，一肩扛起責任解決問題，將危機化為轉機。", "下午行程 (進修充電)：若感疲倦，可安排高質感專業課程或閱讀專業書籍，提升解決問題的能力。", "傍晚行程 (深度交心)：陪伴最在乎的核心幹部與VIP客戶，不談業績，主動關心對方生活；並充當和事佬化解團隊或家庭衝突。"],
+                tip: "一肩扛起責任，將危機化為轉機。用智慧與利他之心，深度關懷身邊重要的人。",
+                tagline: "用一肩扛起責任的肩膀修復卡關；你的擔當，就是最療癒的磁場！",
+                quote: "「不怕麻煩、主動站出來！用超越期待的負責任態度，將眼前的危機轉化為彼此一輩子的深厚信任。」",
+                checklist: ["面對抱怨或複雜難題，我有沒有第一時間站出來說「我來處理」？", "今天我有沒有讓焦慮的客戶或夥伴，因我的承諾而重獲平靜？", "今晚我有沒有適度放手、對自己說聲辛苦了，幫自己修復充電？"] },
+            7: { name: "底層邏輯與請益日", subtitle: "軍師智慧", short: "貴人", group: "close", color: "bg-green-50 text-green-700 border-green-200", borderColor: "border-green-200", textColor: "text-green-600", modalClass: "bg-gradient-to-r from-green-600 to-emerald-500", icon: "fa-magnifying-glass-chart",
+                goal: "見高知、高資產客戶時不談人情，用無懈可擊的邏輯與數據說服對方簽約；主動向職場前輩或企業主「預約請益」，聽取高階智慧。",
+                actions: ["全天行程 (精準簽約)：安排高資產、高知識分子客戶，用無懈可擊的白紙黑字數據與邏輯說服對方簽約。", "下午行程 (貴人對接與重整)：主動約企業主客戶或職場前輩喝茶請益；回到大後方將客戶名單深度分類、彙整理賠與續期資料。", "晚上行程 (探尋真相)：留一小時檢視業績問題根源，並與自己或核心主管進行深度職涯定位對話。"],
+                tip: "保持思緒清明，運用底層邏輯說服客戶。主動請益貴人，並留時間給自己深度檢視與定位。",
+                tagline: "用白紙黑字看透卡關真相；以謙遜請益，借力頂級高階貴人。",
+                quote: "「今天不盲從、不浮躁！退回大後方將名單結構化重整，我的深度與清明，就是最強高階貴人磁場。」",
+                checklist: ["今天面對高端客戶，我是用邏輯數據說服對方，還是流於人情推銷？", "今天我有沒有放下身段，帶著具體問題向比我厲害的高手請益？"] },
+            8: { name: "主導與顯化日", subtitle: "黃金收割", short: "收割", group: "close", color: "bg-green-50 text-green-700 border-green-200", borderColor: "border-green-200", textColor: "text-green-600", modalClass: "bg-gradient-to-r from-emerald-600 to-green-600", icon: "fa-file-contract",
+                goal: "換上挺拔戰袍，排滿高階人才合夥面談，大膽主導對話；去催促 pending 合約落實與收件，歡喜收割過去努力成果。",
+                actions: ["全天行程 (強力增員與談單)：換上最挺拔的戰袍，排滿高階人才合夥面談，大膽爭取主控權；用客觀真實的專業鎖定大額保單財運。", "下午行程 (快樂收網)：去跟客戶收件、催促合約落實，收割過去7天的努力成果，果斷迎接接二連三的新商機。"],
+                tip: "換上戰袍，大膽爭取主控權！展現專業鎖定財運，今天是歡喜收割過去努力成果的好日子。",
+                tagline: "理直氣壯談錢！換上戰袍，完成最高規格的物質豐盛顯化。",
+                quote: "「收起不好意思的心態！今天用最強大的領袖主導力與利他專業，理直氣壯地將善緣轉化為實質財富。」",
+                checklist: ["面對高階人才或大客戶時，我是否有展現氣場並拿回對話主導權？", "今天我有沒有果斷、主動地向客戶催促合約落地與收單？", "晚上我有沒有放下匱乏感，好好犒賞自己、體驗豐盛並真誠感恩？"] },
+            9: { name: "圓滿與斷捨離日", subtitle: "奇蹟藍圖", short: "圓滿", group: "solo", color: "bg-red-50 text-red-700 border-red-200", borderColor: "border-red-200", textColor: "text-red-600", modalClass: "bg-gradient-to-r from-rose-600 to-red-600", icon: "fa-hands-holding-heart",
+                goal: "不開闢新戰場，專注於追蹤未補齊合約與理賠確認，完美結案；果斷封存不對頻的「幽靈名單」，安排不帶要保書的純感恩拜訪。",
+                actions: ["全天行程 (圓滿收網)：不開闢新戰場，專注於追蹤未補齊合約、確認理賠金入帳，完美結案。", "下午行程 (斷捨離與感恩)：封存無效的「幽靈名單」，戒掉浪費時間的工作習慣。安排兩場不帶要保書的純感恩拜訪，或去做義工回饋社會。", "傍晚行程 (靜心與策勵)：控制情緒波動，多休息；拿出一張白紙，天馬行空地寫下下一個9天循環的「奇蹟藍圖」與高目標。"],
+                tip: "不開闢新戰場，專注完美結案與斷捨離。帶著感恩的心，策劃下一個循環的奇蹟藍圖。",
+                tagline: "帶著豁達感恩完美收網；果斷清空記憶體，預約下一個奇蹟！",
+                quote: "「向舊世界優雅告別！今天我不糾結、不留戀，用豁達與純粹利他，迎接下一個大循環的奇蹟新局。」",
+                checklist: ["今天我有沒有把所有卡關案件追蹤到底，做到 100% 完美結案？", "我今天有沒有勇敢切斷負能量、封存幽靈名單以清空大腦記憶體？", "睡前我有沒有留出神聖時間，天馬行空地在白紙上畫出「奇蹟藍圖」？"] }
+        };
+
+        const inputAgentName = document.getElementById('agentName');
+        const selectMonth = document.getElementById('birthMonth');
+        const selectDay = document.getElementById('birthDay');
+        const targetMonthInput = document.getElementById('targetMonth');
+
+        for (let i = 1; i <= 12; i++) {
+            selectMonth.appendChild(new Option(`${i} 月`, i));
+        }
+
+        function updateDays() {
+            const m = parseInt(selectMonth.value);
+            const currentSelectedDay = parseInt(selectDay.value);
+            selectDay.innerHTML = '<option value="">選擇日期</option>';
+            if (!m) return;
+            const daysInMonth = new Date(2024, m, 0).getDate(); 
+            for (let i = 1; i <= daysInMonth; i++) {
+                selectDay.appendChild(new Option(`${i} 日`, i));
+            }
+            if (currentSelectedDay && currentSelectedDay <= daysInMonth) {
+                selectDay.value = currentSelectedDay;
+            }
+        }
+
+        selectMonth.addEventListener('change', updateDays);
+
+        const savedName = localStorage.getItem('agentName');
+        const savedMonth = localStorage.getItem('userBirthMonth');
+        const savedDay = localStorage.getItem('userBirthDay');
+        if (savedName) inputAgentName.value = savedName;
+        if (savedMonth) {
+            selectMonth.value = savedMonth;
+            updateDays();
+            if (savedDay) selectDay.value = savedDay;
+        } else {
+            updateDays();
+        }
+
+        const today = new Date();
+        targetMonthInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+
+        const listSolo = document.getElementById('listSolo');
+        const listSocial = document.getElementById('listSocial');
+        const listClose = document.getElementById('listClose');
+
+        for (let i = 1; i <= 9; i++) {
+            const flow = workflowData[i];
+            const div = document.createElement('div');
+            div.className = `flex items-start p-3 bg-white rounded-lg border ${flow.borderColor} shadow-sm`;
+            div.innerHTML = `<div class="flex-shrink-0 w-8 h-8 rounded-full ${flow.color} flex items-center justify-center font-bold text-sm mr-3 border">${i}</div><div><h4 class="font-bold text-slate-800 text-sm">【${flow.short}】${flow.name}</h4><p class="text-xs text-slate-500 mt-1 line-clamp-2">${flow.goal}</p></div>`;
+            if (flow.group === 'solo') listSolo.appendChild(div);
+            if (flow.group === 'social') listSocial.appendChild(div);
+            if (flow.group === 'close') listClose.appendChild(div);
+        }
+
+        function digitalRoot(n) { return n === 0 ? 0 : (n - 1) % 9 + 1; }
+        function getPersonalYear(tYear, tMonth, bMonth, bDay) { return digitalRoot((tMonth < bMonth ? tYear - 1 : tYear) + bMonth + bDay); }
+        function getPersonalMonth(pYear, cMonth) { return digitalRoot(pYear + cMonth); }
+        function getPersonalDay(pMonth, cDay) { return digitalRoot(pMonth + cDay); }
+
+        async function recordUsageToSheet(agentName, targetMonth, bMonth, bDay) {
+            if (!GAS_API_URL || GAS_API_URL.includes("請把您的_GAS_網址貼在這裡")) return;
+            try {
+                const payload = { 
+                    name: agentName || "未具名業務", 
+                    action: "產出專屬工作曆", 
+                    targetMonth: targetMonth,
+                    bMonth: bMonth,
+                    bDay: bDay
+                };
+                fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(payload), headers: { "Content-Type": "text/plain;charset=utf-8" } }).catch(e => console.log("紀錄發送失敗"));
+            } catch (e) { console.log(e); }
+        }
+
+        let currentCalendarState = { year: null, month: null, pMonth: null, agentName: '' };
+
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            const agentName = inputAgentName.value.trim();
+            const bMonth = parseInt(selectMonth.value);
+            const bDay = parseInt(selectDay.value);
+            const targetVal = targetMonthInput.value; 
+
+            if (!bMonth || !bDay || !targetVal) {
+                document.getElementById('errorMsg').classList.remove('hidden'); return;
+            }
+            document.getElementById('errorMsg').classList.add('hidden');
+
+            localStorage.setItem('agentName', agentName);
+            localStorage.setItem('userBirthMonth', bMonth);
+            localStorage.setItem('userBirthDay', bDay);
+
+            recordUsageToSheet(agentName, targetVal, bMonth, bDay);
+
+            const [tYear, tMonth] = targetVal.split('-').map(Number);
+            const pYear = getPersonalYear(tYear, tMonth, bMonth, bDay);
+            const pMonth = getPersonalMonth(pYear, tMonth);
+
+            document.getElementById('calendarTitle').innerText = `${tYear} 年 ${tMonth} 月 - ${agentName ? agentName+' 的' : ''}專屬工作曆`;
+            document.getElementById('displayPersonalYear').innerText = pYear;
+            document.getElementById('displayPersonalMonth').innerText = pMonth;
+            
+            const yearKw = ["開創播種", "耐心扎根", "展現交流", "穩定建設", "變動拓展", "責任服務", "學習沉澱", "豐收成就", "總結重整"];
+            document.getElementById('yearDesc').innerText = `${yearKw[pYear-1]}之年`;
+            document.getElementById('monthDesc').innerText = `${yearKw[pMonth-1]}之月`;
+
+            generateCalendarGrid(tYear, tMonth, pMonth, agentName);
+            currentCalendarState = { year: tYear, month: tMonth, pMonth: pMonth, agentName: agentName };
+
+            const resultSection = document.getElementById('resultSection');
+            resultSection.classList.remove('hidden');
+            setTimeout(() => resultSection.classList.remove('opacity-0'), 50);
+            setTimeout(() => resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+        });
+
+        function generateCalendarGrid(year, month, pMonth, agentName) {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = ''; 
+            const firstDay = new Date(year, month - 1, 1).getDay();
+            const daysInMonth = new Date(year, month, 0).getDate();
+
+            for (let i = 0; i < firstDay; i++) {
+                const div = document.createElement('div'); div.className = "p-2 bg-transparent"; grid.appendChild(div);
+            }
+
+            const todayDate = new Date();
+            const isCurrentMonth = (todayDate.getFullYear() === year && todayDate.getMonth() + 1 === month);
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const pDay = getPersonalDay(pMonth, day);
+                const flow = workflowData[pDay];
+                const isToday = isCurrentMonth && (day === todayDate.getDate());
+                
+                const cell = document.createElement('div');
+                cell.className = `day-cell relative bg-white border border-slate-200 rounded-xl p-2 md:p-3 cursor-pointer min-h-[80px] md:min-h-[100px] flex flex-col ${isToday ? "ring-2 ring-primary ring-offset-2" : ""}`;
+                cell.innerHTML = `<div class="flex justify-between items-start mb-1"><span class="text-sm md:text-base font-semibold ${isToday ? 'text-primary' : 'text-slate-700'}">${day}</span><span class="w-5 h-5 md:w-6 md:h-6 rounded-full ${flow.color} border flex items-center justify-center text-xs font-bold shadow-sm">${pDay}</span></div><div class="mt-auto text-center"><div class="text-xs md:text-sm font-bold ${flow.textColor} mb-1 truncate">${flow.short}</div><i class="fa-solid ${flow.icon} ${flow.textColor} opacity-60 text-sm md:text-base mt-1"></i></div>`;
+                cell.addEventListener('click', () => openModal(year, month, day, pMonth, pDay, flow, agentName));
+                grid.appendChild(cell);
+            }
+        }
+
+        let currentModalState = { year: null, month: null, day: null, pMonth: null, pDay: null, flow: null, agentName: '' };
+        const modal = document.getElementById('dayModal');
+        const modalContent = document.getElementById('modalContent');
+
+        function openModal(year, month, day, pMonth, pDay, flow, agentName) {
+            currentModalState = { year, month, day, pMonth, pDay, flow, agentName };
+            document.getElementById('modalHeader').className = `relative p-6 text-white text-center transition-colors duration-300 ${flow.modalClass}`;
+            document.getElementById('modalDate').innerText = `${year}年${String(month).padStart(2,'0')}月${String(day).padStart(2,'0')}日`;
+            document.getElementById('modalPMonth').innerText = pMonth;
+            document.getElementById('modalPDay').innerText = pDay;
+            document.getElementById('modalNumber').innerText = pDay;
+            document.getElementById('modalTitle').innerText = `【${flow.short}日】${flow.name}`;
+            document.getElementById('modalSubtitle').innerText = flow.subtitle || '';
+
+            const greetingEl = document.getElementById('modalAgentGreeting');
+            if (agentName) {
+                greetingEl.innerText = `🙌 ${agentName}，準備好今天的行動了嗎？`; greetingEl.classList.remove('hidden');
+            } else { greetingEl.classList.add('hidden'); }
+
+            document.getElementById('modalGoal').innerText = flow.goal;
+            document.getElementById('modalTip').innerText = flow.tip;
+            document.getElementById('modalTagline').innerText = flow.tagline || '';
+            document.getElementById('modalQuote').innerText = flow.quote || '';
+
+            const actionList = document.getElementById('modalActionList'); actionList.innerHTML = '';
+            flow.actions.forEach(action => { const li = document.createElement('li'); li.innerText = action; actionList.appendChild(li); });
+
+            // 夜間 21:00 執行檢視（Checklist，含 localStorage 記憶勾選狀態）
+            const checklistEl = document.getElementById('modalChecklist');
+            checklistEl.innerHTML = '';
+            const checkKey = `checklist_${year}_${month}_${day}`;
+            const savedChecks = JSON.parse(localStorage.getItem(checkKey) || '[]');
+            (flow.checklist || []).forEach((item, idx) => {
+                const isChecked = savedChecks[idx] || false;
+                const div = document.createElement('div');
+                div.className = 'flex items-start gap-3';
+                div.innerHTML = `<input type="checkbox" id="chk_${idx}" class="mt-0.5 w-4 h-4 rounded cursor-pointer flex-shrink-0" style="accent-color:#4f46e5" ${isChecked ? 'checked' : ''}><label for="chk_${idx}" class="text-sm text-slate-600 cursor-pointer leading-snug select-none">${item}</label>`;
+                div.querySelector('input').addEventListener('change', () => {
+                    const checks = (flow.checklist || []).map((_, i) => { const el = document.getElementById(`chk_${i}`); return el ? el.checked : false; });
+                    localStorage.setItem(checkKey, JSON.stringify(checks));
+                });
+                checklistEl.appendChild(div);
+            });
+
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            requestAnimationFrame(() => { modal.classList.remove('opacity-0'); modalContent.classList.remove('scale-95'); modalContent.classList.add('scale-100'); });
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0'); modalContent.classList.remove('scale-100'); modalContent.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300); 
+        }
+
+        document.getElementById('closeModal').addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+        function formatDateForICS(year, month, day) { return `${year}${String(month).padStart(2, '0')}${String(day).padStart(2, '0')}`; }
+        
+        function foldLine(line) {
+            const MAX_LENGTH = 73; let result = '';
+            while (line.length > 0) {
+                if (result.length > 0) result += '\r\n ';
+                result += line.substring(0, MAX_LENGTH); line = line.substring(MAX_LENGTH);
+            }
+            return result;
+        }
+
+        function generateICSEvent(year, month, day, pMonth, pDay, flow, agentName) {
+            const startDate = formatDateForICS(year, month, day);
+            const nextDay = new Date(year, month - 1, day + 1);
+            const endDate = formatDateForICS(nextDay.getFullYear(), nextDay.getMonth() + 1, nextDay.getDate());
+            const actionString = flow.actions.map(a => `- ${a}`).join('\\n');
+            const prefix = agentName ? `[${agentName}] ` : '';
+            const greeting = agentName ? `嗨 ${agentName}！\\n` : '';
+            const rawDescription = `${greeting}🔢 當日能量：流月 ${pMonth} ✕ 流日 ${pDay}\\n\\n🎯 目標：${flow.goal}\\n\\n📋 行動建議：\\n${actionString}\\n\\n💡 能量提醒：${flow.tip}`;
+            
+            return `BEGIN:VEVENT\r
+DTSTART;VALUE=DATE:${startDate}\r
+DTEND;VALUE=DATE:${endDate}\r
+SUMMARY:${foldLine(`${prefix}【${flow.short}】${flow.name}`)}\r
+DESCRIPTION:${foldLine(rawDescription)}\r
+TRANSP:TRANSPARENT\r
+END:VEVENT\r\n`;
+        }
+
+        function downloadICS(content, filename) {
+            const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = filename;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+
+        document.getElementById('exportMonthBtn').addEventListener('click', () => {
+            const { year, month, pMonth, agentName } = currentCalendarState;
+            if (!year) return;
+            let icsContent = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Numerology Calendar//TW\r\nCALSCALE:GREGORIAN\r\n`;
+            const daysInMonth = new Date(year, month, 0).getDate();
+            for (let day = 1; day <= daysInMonth; day++) icsContent += generateICSEvent(year, month, day, pMonth, getPersonalDay(pMonth, day), workflowData[getPersonalDay(pMonth, day)], agentName);
+            icsContent += `END:VCALENDAR`;
+            downloadICS(icsContent, `${agentName ? agentName+'_' : ''}生命靈數工作曆_${year}年${month}月.ics`);
+        });
+
+        document.getElementById('exportDayBtn').addEventListener('click', () => {
+            const { year, month, day, pMonth, pDay, flow, agentName } = currentModalState;
+            if (!year) return;
+            let icsContent = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Numerology Calendar//TW\r\nCALSCALE:GREGORIAN\r\n`;
+            icsContent += generateICSEvent(year, month, day, pMonth, pDay, flow, agentName);
+            icsContent += `END:VCALENDAR`;
+            downloadICS(icsContent, `${agentName ? agentName+'_' : ''}生命靈數_${month}月${day}日_${flow.short}.ics`);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="阿福教練流日能量發信工具 - 輸入客戶生日，一鍵產生個人化生日卡與7天流日能量訊息">
+    <title>流日能量・客戶關懷發信工具 | 阿福教練</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['"Noto Sans TC"', 'sans-serif'] } } }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 55%, #0c1a35 100%);
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .glass-gold {
+            background: rgba(245,158,11,0.07);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(245,158,11,0.18);
+        }
+        .input-field {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            background: rgba(255,255,255,0.09);
+            border-color: rgba(245,158,11,0.5);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(245,158,11,0.08);
+        }
+        select option { background: #1e1b4b; color: #f1f5f9; }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .slide-up { animation: slideUp 0.45s ease both; }
+
+        @keyframes copyPop { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+        .copy-pop { animation: copyPop 0.25s ease; }
+
+        @keyframes shimmer {
+            0%   { background-position: -200% center; }
+            100% { background-position:  200% center; }
+        }
+        .shimmer-text {
+            background: linear-gradient(90deg, #fbbf24, #f59e0b, #fde68a, #f59e0b, #fbbf24);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 4s linear infinite;
+        }
+
+        .msg-preview {
+            font-family: 'Noto Sans TC', sans-serif;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.85;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(245,158,11,0.35); border-radius: 3px; }
+
+        /* Star dots decoration */
+        .star-bg {
+            background-image: radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        /* Badge styles per group */
+        .badge-solo   { background:rgba(239,68,68,0.18); border:1px solid rgba(239,68,68,0.3); color:#fca5a5; }
+        .badge-social { background:rgba(245,158,11,0.18); border:1px solid rgba(245,158,11,0.3); color:#fcd34d; }
+        .badge-close  { background:rgba(16,185,129,0.18); border:1px solid rgba(16,185,129,0.3); color:#6ee7b7; }
+
+        .header-solo   { background:rgba(127,29,29,0.25); border-bottom:1px solid rgba(239,68,68,0.18); }
+        .header-social { background:rgba(120,53,15,0.25); border-bottom:1px solid rgba(245,158,11,0.18); }
+        .header-close  { background:rgba(6,78,59,0.25); border-bottom:1px solid rgba(16,185,129,0.18); }
+
+        .dot-solo   { background:#f87171; }
+        .dot-social { background:#fbbf24; }
+        .dot-close  { background:#34d399; }
+
+        .btn-solo   { border:1px solid rgba(239,68,68,0.4); color:#fca5a5; }
+        .btn-solo:hover   { background:rgba(239,68,68,0.15); }
+        .btn-social { border:1px solid rgba(245,158,11,0.4); color:#fcd34d; }
+        .btn-social:hover { background:rgba(245,158,11,0.15); }
+        .btn-close  { border:1px solid rgba(16,185,129,0.4); color:#6ee7b7; }
+        .btn-close:hover  { background:rgba(16,185,129,0.15); }
+    </style>
+</head>
+<body class="text-white font-sans p-4 md:p-8">
+<div class="max-w-3xl mx-auto">
+
+    <!-- Back Link -->
+    <div class="mb-7">
+        <a href="../index.html" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-amber-400 text-sm transition">
+            <i class="fa-solid fa-arrow-left text-xs"></i> 返回主工作曆
+        </a>
+    </div>
+
+    <!-- ── Header ── -->
+    <header class="text-center mb-10">
+        <div class="inline-flex items-center gap-2 glass-gold px-4 py-1.5 rounded-full text-amber-400 text-sm font-semibold mb-5">
+            <i class="fa-solid fa-paper-plane"></i>
+            生日關懷・自動發信工具
+        </div>
+        <h1 class="text-3xl md:text-4xl font-black mb-3 leading-tight">
+            <span class="shimmer-text">流日能量</span>
+            <span class="text-white"> 客戶關懷信</span>
+        </h1>
+        <p class="text-slate-400 max-w-md mx-auto text-sm leading-relaxed">
+            輸入客戶生日，一鍵產出個人化生日祝福卡 ＋ 7 天流日能量訊息<br>
+            每則附一鍵複製，可透過 Line、Email 或任何管道發送
+        </p>
+    </header>
+
+    <!-- ── Input Form ── -->
+    <div class="glass rounded-2xl p-6 md:p-8 mb-8">
+        <h2 class="text-amber-400 font-bold mb-6 flex items-center gap-2">
+            <i class="fa-solid fa-user-pen"></i> 輸入客戶資訊
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1.5">
+                    客戶姓名 <span class="text-amber-500">*</span>
+                </label>
+                <input id="clientName" type="text" placeholder="例如：王小明"
+                    class="input-field w-full rounded-xl px-4 py-3 text-white placeholder-slate-600 text-sm">
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1.5">
+                    您的姓名（業務員，選填）
+                </label>
+                <input id="agentName" type="text" placeholder="例如：阿福教練"
+                    class="input-field w-full rounded-xl px-4 py-3 text-white placeholder-slate-600 text-sm">
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1.5">
+                    客戶生日（月）<span class="text-amber-500">*</span>
+                </label>
+                <select id="birthMonth"
+                    class="input-field w-full rounded-xl px-4 py-3 text-white text-sm">
+                    <option value="">選擇月份</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs text-slate-400 mb-1.5">
+                    客戶生日（日）<span class="text-amber-500">*</span>
+                </label>
+                <select id="birthDay"
+                    class="input-field w-full rounded-xl px-4 py-3 text-white text-sm">
+                    <option value="">選擇日期</option>
+                </select>
+            </div>
+
+            <div class="sm:col-span-2">
+                <label class="block text-xs text-slate-400 mb-1.5">
+                    第一則發送日（生日當天或自訂起始日）<span class="text-amber-500">*</span>
+                </label>
+                <input id="startDate" type="date"
+                    class="input-field w-full rounded-xl px-4 py-3 text-white text-sm">
+                <p class="text-xs text-slate-600 mt-1.5">
+                    <i class="fa-solid fa-circle-info mr-1 text-amber-700/60"></i>
+                    生日快樂卡為第 0 則（當天發送），7 則流日訊息從「隔天」起算，共 8 則內容
+                </p>
+            </div>
+        </div>
+
+        <div id="errMsg" class="hidden mb-4 text-red-400 text-sm bg-red-900/20 border border-red-800/30 rounded-xl px-4 py-3">
+            <i class="fa-solid fa-triangle-exclamation mr-2"></i>請填寫所有必填欄位（客戶姓名、生日月日、起始日）
+        </div>
+
+        <button id="generateBtn"
+            class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-amber-500/20 text-base flex items-center justify-center gap-2">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            產生生日卡 ＋ 7 天能量訊息
+        </button>
+    </div>
+
+    <!-- ── Output Section ── -->
+    <div id="output" class="hidden space-y-5">
+
+        <!-- Toolbar -->
+        <div class="flex justify-between items-center">
+            <p id="outputSummary" class="text-sm text-slate-400"></p>
+            <button id="exportBtn"
+                class="glass hover:bg-white/8 border-white/15 text-slate-400 hover:text-white text-xs font-medium py-2 px-4 rounded-lg transition flex items-center gap-1.5">
+                <i class="fa-solid fa-file-arrow-down"></i> 匯出全部 .txt
+            </button>
+        </div>
+
+        <!-- ── Birthday Card ── -->
+        <div class="slide-up" style="animation-delay:0s">
+            <div class="flex items-center gap-2 mb-2.5">
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full" style="background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.35);color:#c4b5fd">
+                    🎂 第 0 則・生日快樂卡
+                </span>
+                <span id="bdDateLabel" class="text-xs text-slate-500"></span>
+            </div>
+
+            <div class="rounded-2xl overflow-hidden" style="background:linear-gradient(135deg,#5b21b6 0%,#4338ca 50%,#1d4ed8 100%)">
+                <div class="relative px-6 py-7 star-bg">
+                    <pre id="bdText" class="msg-preview text-white text-sm relative z-10 leading-loose"></pre>
+                </div>
+            </div>
+
+            <div class="flex justify-end mt-2.5">
+                <button onclick="copyMsg('birthday', this)"
+                    class="text-xs py-1.5 px-3 rounded-lg transition flex items-center gap-1.5"
+                    style="border:1px solid rgba(139,92,246,0.4);color:#c4b5fd">
+                    <i class="fa-regular fa-copy"></i> 複製生日卡
+                </button>
+            </div>
+        </div>
+
+        <!-- ── 7 Day Message Cards ── -->
+        <div id="daysContainer" class="space-y-4"></div>
+
+        <!-- Bottom Export -->
+        <div class="glass rounded-2xl p-6 text-center">
+            <p class="text-slate-400 text-sm mb-4">全部 8 則訊息已就緒，可一次匯出為純文字備用</p>
+            <button onclick="document.getElementById('exportBtn').click()"
+                class="bg-white/8 hover:bg-white/12 border border-white/15 text-slate-300 hover:text-white font-medium py-2.5 px-7 rounded-xl transition text-sm">
+                <i class="fa-solid fa-file-arrow-down mr-2"></i>匯出全部 8 則 .txt
+            </button>
+        </div>
+    </div>
+
+</div><!-- /max-w-3xl -->
+
+<script>
+// ═══════════════════════════════════════════════
+//  DATA — 9 流日工作流（精簡客戶版）
+// ═══════════════════════════════════════════════
+const workflowData = {
+    1: { name:"破局與開創日", subtitle:"舒適圈粉碎", short:"破局", group:"solo",
+         tagline:"不用等待許可，今天你就是自己生命中最強大的貴人！",
+         quote:"「在猶豫中等待機會，不如用勇敢劈開第一道曙光！今天不設限，我的獨立與果斷，就是最強大的開創磁場。」",
+         tip:"眼前的機會絕不猶豫，今天必須拿出勇氣、獨立出擊，播下最勇敢的種子。",
+         checklist:["今天有沒有做一件平時最不敢做的勇敢嘗試？","面對機會，有沒有當機立斷「立刻行動」？"] },
+    2: { name:"借力與傾聽日", subtitle:"溫柔凝聚力", short:"借力", group:"social",
+         tagline:"收起鋒芒、張開雙耳。學會借力，才是最高明的大格局。",
+         quote:"「平時靠實力，今天靠魅力與聽力。縮小自己、放大對方，用最高級的溫柔凝聚全宇宙的人脈複利！」",
+         tip:"今天最強大的力量，是靜靜傾聽對方說的每一句話。",
+         checklist:["今天有沒有忍住說話衝動，好好把對方的話聽完？","有沒有真誠表達感謝，讓對方感受到被重視？","面對不同意見，有沒有先展現同理心？"] },
+    3: { name:"表達與促成日", subtitle:"創意渲染力", short:"促成", group:"close",
+         tagline:"用創意的糖衣，包裹理性的專業；你的快樂就是最強大的促成力！",
+         quote:"「不嚴肅、不糾結！今天我是自己舞台的發表者，用最陽光的笑容去利他，把熱情化為現實的黃金成果。」",
+         tip:"今天的你，就是最有感染力的那個人。展現快樂，就能感染身邊所有人！",
+         checklist:["今天有沒有釋放出樂觀、喜悅的正向能量？","面對卡關，有沒有用幽默或創意的方式嘗試突破？","今晚有沒有留一小時做自己最喜歡的事？"] },
+    4: { name:"務實與扎根日", subtitle:"信任落地方案", short:"扎根", group:"close",
+         tagline:"不給模糊承諾，答應的事精準做到；用無懈可擊的誠信築起護城河！",
+         quote:"「今天不浮誇、不浮躁！用最扎實的行動與誠信，將善緣化為最讓人安心的長久關係。」",
+         tip:"今天做的每一件踏實小事，都是未來最穩固的基石。",
+         checklist:["今天答應別人的事，有沒有精準做到，不留模糊空間？","待辦事項和重要環境，今天是否有確實整理？","今天有沒有讓身邊的人感受到你的可靠與誠信？"] },
+    5: { name:"跨界與突破日", subtitle:"打破舒適圈", short:"擴張", group:"social",
+         tagline:"守成就是最大的風險！帶著破局之翼，讓遠大願景飛越一切限制。",
+         quote:"「拒絕無效瞎忙，大膽打破現狀！今天我不設限，我的勇敢與跨界，就是最強大的擴張磁場。」",
+         tip:"今天做一件讓自己稍微不舒服但充滿可能性的新嘗試！",
+         checklist:["今天有沒有主動走向新環境或接觸新朋友？","有沒有拒絕一件低效的事，把時間留給真正重要的目標？","晚上有沒有體驗新事物，幫大腦注入創新靈感？"] },
+    6: { name:"擔當與修復日", subtitle:"智慧與大愛", short:"修復", group:"solo",
+         tagline:"用一肩扛起責任的肩膀修復卡關；你的擔當，就是最療癒的磁場！",
+         quote:"「不怕麻煩、主動站出來！用超越期待的責任心，將眼前的困境轉化為彼此一輩子的深厚信任。」",
+         tip:"今天用愛與責任修復所有卡關，你的擔當就是最美的力量。",
+         checklist:["面對難題，有沒有第一時間勇敢說「我來處理」？","今天有沒有讓身邊焦慮的人，因自己而重獲平靜？","今晚有沒有好好對自己說聲辛苦了，適度放手休息？"] },
+    7: { name:"底層邏輯與請益日", subtitle:"軍師智慧", short:"貴人", group:"close",
+         tagline:"用清晰的眼光看透真相；以謙遜請益，借力生命中的頂級貴人。",
+         quote:"「今天不盲從、不浮躁！退回大後方深度整理，我的清明與深度，就是吸引最強高階貴人的磁場。」",
+         tip:"今天把時間留給深度思考，一個清晰的決策，勝過百個倉促的行動。",
+         checklist:["今天有沒有用邏輯與理性做重要決定？","有沒有主動向比自己厲害的人學習或請益？"] },
+    8: { name:"主導與顯化日", subtitle:"黃金收割", short:"收割", group:"close",
+         tagline:"理直氣壯展現自己！換上戰袍，完成最高規格的豐盛顯化。",
+         quote:"「收起不好意思的心態！今天用最強大的領袖氣場與利他心，理直氣壯地將善緣轉化為實質的豐盛果實。」",
+         tip:"今天換上自信的戰袍，大聲說出自己的價值！你值得擁有最好的。",
+         checklist:["今天有沒有展現出自信的氣場，拿回自己的主導權？","有沒有果斷推動一件重要的事，讓它真正落地？","晚上有沒有好好犒賞自己，感恩今天所有的收穫？"] },
+    9: { name:"圓滿與斷捨離日", subtitle:"奇蹟藍圖", short:"圓滿", group:"solo",
+         tagline:"帶著豁達感恩完美收網；果斷清空記憶體，預約下一個奇蹟！",
+         quote:"「向舊世界優雅告別！今天我不糾結、不留戀，用豁達與純粹利他，迎接下一個大循環的奇蹟新局。」",
+         tip:"今天帶著感恩完美結尾，然後勇敢放手，讓更好的事物到來。",
+         checklist:["今天有沒有把卡關或懸而未決的事，追蹤到底、完美結案？","有沒有勇敢放下一個消耗自己的事物，清空大腦記憶體？","睡前有沒有留出時間，天馬行空畫出下一個循環的奇蹟藍圖？"] }
+};
+
+const yearKw = ["開創播種","耐心扎根","展現交流","穩定建設","變動拓展","責任服務","學習沉澱","豐收成就","總結重整"];
+const yearDescs = {
+    1:{ d:"嶄新的能量週期正在為您開啟！這是勇於行動、播下夢想種子的一年，每一個大膽的第一步，都將化為未來豐收的基礎。",
+        w:"願您今年以無懼之心迎向每一個新機遇，創造屬於您的精彩人生！" },
+    2:{ d:"這是深耕關係、積累信任的一年。溫柔而堅定的力量，正在為生命最重要的一切打下最穩固的根基。",
+        w:"願您今年在每一段珍貴關係中感受到溫暖與力量，靜待美好的綻放！" },
+    3:{ d:"您的才華與魅力正等待被全世界看見！這是表達自我、廣結善緣的一年，天生的光芒將感染身邊每一個人。",
+        w:"願您今年盡情展現最閃耀的自己，用歡笑與熱情迎接人生每一個高光時刻！" },
+    4:{ d:"腳踏實地的力量，正是今年最大的禮物。這是築夢踏實、打造長久成就的一年，每一份付出都將留下最深實的印記。",
+        w:"願您今年將每一個計畫化為堅實的成果，用勤勉與誠信創造令人欽佩的人生成就！" },
+    5:{ d:"自由與突破是今年最強大的能量！這是勇敢跨越舒適圈、擁抱無限可能的一年，改變正是最好的禮物。",
+        w:"願您今年乘著改變的翅膀，勇敢飛向更廣闊的天地，讓生命充滿驚喜與精彩！" },
+    6:{ d:"今年，深情與擔當將成為身邊人最溫暖的依靠。這是深耕關係、收穫深厚情誼的一年，愛是最強大的能量。",
+        w:"願您今年在給予與被愛中感受到最豐盛的幸福，您的善良是世界最美的禮物！" },
+    7:{ d:"智慧的大門正為您敞開！這是洞察真理、提升生命格局的一年，每一次靜思都是靈魂最深的升華。",
+        w:"願您今年在知識與智慧中找到最深的寧靜與力量，成就更深刻而豐富的自己！" },
+    8:{ d:"多年的努力正在迎來最美好的收穫！這是豐盛顯化、實現夢想的一年，豐收與成就正向您奔來。",
+        w:"願您今年大豐收，所有的付出都得到最圓滿的回報，盡情享受您應得的一切美好！" },
+    9:{ d:"圓滿與智慧是今年最動人的能量。這是優雅告別舊循環、以感恩之心迎向嶄新篇章的一年。",
+        w:"願您今年帶著滿滿的感恩與智慧，圓滿完成每一個美好的故事，優雅迎向生命的嶄新精彩！" }
+};
+
+const weekdays = ['日','一','二','三','四','五','六'];
+
+// ═══════════════════════════════════════════════
+//  INIT — Dropdowns & Default Date
+// ═══════════════════════════════════════════════
+const selMonth = document.getElementById('birthMonth');
+const selDay   = document.getElementById('birthDay');
+for (let i=1;i<=12;i++) selMonth.appendChild(new Option(`${i} 月`,i));
+selMonth.addEventListener('change', updateDays);
+
+function updateDays() {
+    const m = parseInt(selMonth.value), cur = parseInt(selDay.value);
+    selDay.innerHTML = '<option value="">選擇日期</option>';
+    if (!m) return;
+    const max = new Date(2000, m, 0).getDate();
+    for (let i=1;i<=max;i++) selDay.appendChild(new Option(`${i} 日`,i));
+    if (cur && cur<=max) selDay.value = cur;
+}
+
+const now = new Date();
+document.getElementById('startDate').value =
+    `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
+// ═══════════════════════════════════════════════
+//  NUMEROLOGY HELPERS
+// ═══════════════════════════════════════════════
+const dr     = n => n===0 ? 0 : (n-1)%9+1;
+const getPY  = (tY,tM,bM,bD) => dr((tM<bM?tY-1:tY)+bM+bD);
+const getPM  = (pY,cM)       => dr(pY+cM);
+const getPD  = (pM,cD)       => dr(pM+cD);
+
+function fmtDate(d) {
+    return `${d.getFullYear()}年${String(d.getMonth()+1).padStart(2,'0')}月${String(d.getDate()).padStart(2,'0')}日（星期${weekdays[d.getDay()]}）`;
+}
+function fmtShort(d) {
+    return `${d.getMonth()+1}月${d.getDate()}日（${weekdays[d.getDay()]}）`;
+}
+
+// ═══════════════════════════════════════════════
+//  MESSAGE STORE — for copy & export
+// ═══════════════════════════════════════════════
+const msgStore = {};
+
+// ═══════════════════════════════════════════════
+//  GENERATE
+// ═══════════════════════════════════════════════
+document.getElementById('generateBtn').addEventListener('click', () => {
+    const cn  = document.getElementById('clientName').value.trim();
+    const an  = document.getElementById('agentName').value.trim();
+    const bM  = parseInt(selMonth.value);
+    const bD  = parseInt(selDay.value);
+    const sdV = document.getElementById('startDate').value;
+
+    if (!cn || !bM || !bD || !sdV) {
+        document.getElementById('errMsg').classList.remove('hidden'); return;
+    }
+    document.getElementById('errMsg').classList.add('hidden');
+
+    const [sY,sM,sD] = sdV.split('-').map(Number);
+    const startDate  = new Date(sY, sM-1, sD);
+    const py         = getPY(sY, sM, bM, bD);
+
+    // ── Birthday Card ──
+    Object.keys(msgStore).forEach(k=>delete msgStore[k]); // clear
+    const bdText = buildBirthdayCard(cn, an, py, startDate);
+    msgStore['birthday'] = bdText;
+    document.getElementById('bdText').textContent       = bdText;
+    document.getElementById('bdDateLabel').textContent  = `建議發送日：${fmtShort(startDate)}`;
+
+    // ── 7-Day Messages ──
+    const container = document.getElementById('daysContainer');
+    container.innerHTML = '';
+
+    for (let i=1;i<=7;i++) {
+        const d   = new Date(sY, sM-1, sD+i);
+        const dY  = d.getFullYear(), dM = d.getMonth()+1, dD = d.getDate();
+        const dPY = getPY(dY, dM, bM, bD);
+        const dPM = getPM(dPY, dM);
+        const dPD = getPD(dPM, dD);
+        const flow = workflowData[dPD];
+        const text = buildDayMsg(i, cn, an, d, dPM, dPD, flow);
+        msgStore[`day${i}`] = text;
+
+        const card = buildDayCard(i, d, dPM, dPD, flow, `day${i}`);
+        card.style.animationDelay = `${i * 0.07}s`;
+        card.classList.add('slide-up');
+        container.appendChild(card);
+    }
+
+    document.getElementById('outputSummary').textContent =
+        `✅ 已為「${cn}」產生 1 張生日卡 ＋ 7 則流日能量訊息`;
+
+    const out = document.getElementById('output');
+    out.classList.remove('hidden');
+    setTimeout(() => out.scrollIntoView({ behavior:'smooth', block:'start' }), 120);
+});
+
+// ═══════════════════════════════════════════════
+//  BUILD BIRTHDAY CARD TEXT
+// ═══════════════════════════════════════════════
+function buildBirthdayCard(cn, an, py, date) {
+    const theme = yearKw[py-1];
+    const yd    = yearDescs[py];
+    const sig   = an
+        ? `\n${an} 敬上\n${fmtDate(date)}`
+        : `\n${fmtDate(date)}`;
+    return `🎂 生日快樂，${cn}！
+━━━━━━━━━━━━━━━━━━━
+
+今天是您特別的生日，
+我想在這個美好的日子送上最真摯的祝福 🌟
+
+✨ 您的流年能量洞察
+今年您進入「${theme}之年」（流年 ${py}）
+
+${yd.d}
+
+💫 ${yd.w}
+
+感謝您一路以來的信任與支持，
+您是我生命中最珍貴的貴人！
+
+🎉 祝您生日快樂、健康平安、萬事如意！
+${sig}`;
+}
+
+// ═══════════════════════════════════════════════
+//  BUILD DAY MESSAGE TEXT
+// ═══════════════════════════════════════════════
+function buildDayMsg(n, cn, an, date, pm, pd, flow) {
+    const sig  = an ? `\n${an} 傳送` : '';
+    const cl   = (flow.checklist||[]).map(c=>`  ☐ ${c}`).join('\n');
+    return `📅 第 ${n} 則｜${fmtDate(date)}
+━━━━━━━━━━━━━━━━━━━
+
+嗨 ${cn}，
+
+🌀 今天是您的流日 ${pd}：${flow.name}
+   （${flow.subtitle}）
+
+✨ ${flow.tagline}
+
+${flow.quote}
+
+💡 今日能量提醒：
+${flow.tip}
+
+🧭 夜間 21:00 能量回顧：
+${cl}
+
+願您今天充滿正向能量，
+有任何問題隨時找我 😊${sig}`;
+}
+
+// ═══════════════════════════════════════════════
+//  BUILD DAY CARD DOM
+// ═══════════════════════════════════════════════
+function buildDayCard(n, date, pm, pd, flow, storeKey) {
+    const g   = flow.group;
+    const div = document.createElement('div');
+    div.className = 'glass rounded-2xl overflow-hidden';
+    div.innerHTML = `
+        <div class="flex flex-wrap items-center gap-2 px-5 py-3 header-${g}">
+            <span class="w-6 h-6 rounded-full dot-${g} flex items-center justify-center text-xs font-black text-black flex-shrink-0">${n}</span>
+            <span class="text-sm font-semibold text-white">${fmtDate(date)}</span>
+            <span class="text-xs text-slate-500">建議發送日</span>
+            <span class="ml-auto text-xs px-2.5 py-0.5 rounded-full badge-${g}">
+                流日 ${pd}・${flow.name}
+            </span>
+        </div>
+        <div class="p-5 space-y-3">
+            <p class="text-sm font-bold text-amber-300 leading-relaxed">${flow.tagline}</p>
+            <p class="text-xs text-slate-400 italic leading-relaxed">${escHtml(flow.quote)}</p>
+            <div class="rounded-xl px-4 py-3 text-xs text-slate-300 leading-relaxed"
+                style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07)">
+                💡 ${escHtml(flow.tip)}
+            </div>
+            <div class="flex flex-wrap justify-between items-center gap-2 pt-1">
+                <span class="text-xs text-slate-500">流月 ${pm} × 流日 ${pd}・${flow.subtitle}</span>
+                <button onclick="copyMsg('${storeKey}',this)"
+                    class="btn-${g} text-xs py-1.5 px-3 rounded-lg transition flex items-center gap-1.5">
+                    <i class="fa-regular fa-copy"></i> 一鍵複製
+                </button>
+            </div>
+        </div>`;
+    return div;
+}
+
+function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ═══════════════════════════════════════════════
+//  COPY TO CLIPBOARD
+// ═══════════════════════════════════════════════
+function copyMsg(key, btn) {
+    const text = msgStore[key];
+    if (!text) return;
+    const doSuccess = () => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> 已複製！';
+        btn.classList.add('copy-pop');
+        setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copy-pop'); }, 2200);
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(doSuccess).catch(() => legacyCopy(text, doSuccess));
+    } else {
+        legacyCopy(text, doSuccess);
+    }
+}
+
+function legacyCopy(text, cb) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0;left:-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); cb(); } catch(e) {}
+    document.body.removeChild(ta);
+}
+
+// ═══════════════════════════════════════════════
+//  EXPORT AS .TXT
+// ═══════════════════════════════════════════════
+document.getElementById('exportBtn').addEventListener('click', () => {
+    const cn = document.getElementById('clientName').value.trim() || '客戶';
+    const keys   = ['birthday', ...Array.from({length:7},(_,i)=>`day${i+1}`)];
+    const labels = [
+        '🎂 第 0 則・生日快樂卡（起始日當天）',
+        ...Array.from({length:7},(_,i)=>`📅 第 ${i+1} 則・流日能量訊息`)
+    ];
+    const divider = '═'.repeat(44);
+    let out = `${divider}\n阿福教練・流日能量客戶關懷訊息\n客戶姓名：${cn}\n產出時間：${new Date().toLocaleString('zh-TW')}\n${divider}\n\n`;
+    keys.forEach((k,i) => {
+        if (msgStore[k]) out += `【${labels[i]}】\n${'─'.repeat(40)}\n${msgStore[k]}\n\n\n`;
+    });
+    const blob = new Blob([out], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${cn}_流日能量關懷訊息_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+});
+</script>
+</body>
+</html>

@@ -113,10 +113,14 @@
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                     <i class="fa-solid fa-user-tag text-amber-500"></i> 客戶基本資料 (與試算表欄位同步)
                 </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">客戶姓名 *</label>
                         <input id="clientName" type="text" value="陳大明" class="input-field w-full rounded-xl px-3.5 py-2.5 text-white text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">客戶暱稱</label>
+                        <input id="clientNickname" type="text" value="大明哥" placeholder="發信稱呼（選填）" class="input-field w-full rounded-xl px-3.5 py-2.5 text-white text-sm">
                     </div>
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">公司名稱</label>
@@ -244,7 +248,7 @@
                     <label class="text-xs font-bold text-slate-300">📋 Google 試算表第一行標準欄位 (點擊複製)</label>
                     <button onclick="copyText('headerText')" class="text-xs text-amber-400 hover:underline"><i class="fa-regular fa-copy"></i> 複製欄位</button>
                 </div>
-                <input id="headerText" readonly type="text" value="客戶姓名	公司	服務通訊處	手機	Email	區域	生日月	生日日	備註	自動發送狀態	當前發送進度	最後發送日期" class="input-field w-full rounded-xl px-4 py-2.5 text-xs text-slate-300 select-all font-mono">
+                <input id="headerText" readonly type="text" value="客戶姓名	客戶暱稱	公司	服務通訊處	手機	Email	區域	生日月	生日日	備註	自動發送狀態	當前發送進度	最後發送日期" class="input-field w-full rounded-xl px-4 py-2.5 text-xs text-slate-300 select-all font-mono">
             </div>
 
             <!-- Code Block -->
@@ -366,7 +370,9 @@ function switchTab(tab) {
 // EMAIL HTML GENERATOR (USED FOR LIVE PREVIEW)
 // ═══════════════════════════════════════════════
 function renderAll() {
-    const cn = document.getElementById('clientName').value.trim() || '尊榮客戶';
+    const cnRaw = document.getElementById('clientName').value.trim() || '尊榮客戶';
+    const cnNick = document.getElementById('clientNickname').value.trim();
+    const cn = cnNick || cnRaw; // 優先使用暱稱
     const bM = parseInt(selMonth.value) || 8;
     const bD = parseInt(selDay.value) || 15;
 

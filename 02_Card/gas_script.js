@@ -43,34 +43,37 @@ function dailyCheckAndSend() {
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
     const name = row[0];        // A: 客戶姓名
-    const company = row[1];     // B: 公司
-    const dept = row[2];        // C: 服務通訊處
-    const phone = row[3];       // D: 手機
-    const email = row[4];       // E: Email
-    const region = row[5];      // F: 區域 (嘉義,台南,高雄,屏東...)
-    const bM = parseInt(row[6]);// G: 生日月
-    const bD = parseInt(row[7]);// H: 生日日
-    const note = row[8];        // I: 備註
-    let status = row[9];        // J: 自動發送狀態
-    let progress = parseInt(row[10]) || 0; // K: 當前發送進度
-    let lastDate = row[11];     // L: 最後發送日期
+    const nickname = row[1];    // B: 客戶暱稱
+    const company = row[2];     // C: 公司
+    const dept = row[3];        // D: 服務通訊處
+    const phone = row[4];       // E: 手機
+    const email = row[5];       // F: Email
+    const region = row[6];      // G: 區域 (嘉義,台南,高雄,屏東...)
+    const bM = parseInt(row[7]);// H: 生日月
+    const bD = parseInt(row[8]);// I: 生日日
+    const note = row[9];        // J: 備註
+    let status = row[10];       // K: 自動發送狀態
+    let progress = parseInt(row[11]) || 0; // L: 當前發送進度
+    let lastDate = row[12];     // M: 最後發送日期
 
     if (!name || !email || !bM || !bD) continue;
     if (status === "暫停" || status === "已完成") continue;
     if (lastDate === todayStr) continue; // 今天已發送過
 
+    const displayName = (nickname && String(nickname).trim()) ? String(nickname).trim() : name;
+
     // 檢查狀況 1：今天是否生日？ -> 寄發第 0 則生日卡
     if (tM === bM && tD === bD && progress === 0) {
       const py = getPY(tY, tM, bM, bD);
-      const subject = `🎂 祝 ${name} 生日快樂！給您的專屬流年祝福與能量禮物 🌟`;
-      const html = getBirthdayHtml(name, py, AGENT_CONFIG);
+      const subject = `🎂 祝 ${displayName} 生日快樂！給您的專屬流年祝福與能量禮物 🌟`;
+      const html = getBirthdayHtml(displayName, py, AGENT_CONFIG);
       
       MailApp.sendEmail({ to: email, subject: subject, htmlBody: html });
       
       // 更新試算表狀態
-      sheet.getRange(i + 1, 10).setValue("發送中");
-      sheet.getRange(i + 1, 11).setValue(1); // 下一次進度為 Day 1
-      sheet.getRange(i + 1, 12).setValue(todayStr);
+      sheet.getRange(i + 1, 11).setValue("發送中");
+      sheet.getRange(i + 1, 12).setValue(1); // 下一次進度為 Day 1
+      sheet.getRange(i + 1, 13).setValue(todayStr);
       continue;
     }
 
@@ -81,8 +84,8 @@ function dailyCheckAndSend() {
       const pd = getPD(pm, tD);
       const flow = workflowData[pd];
 
-      const subject = `🌟 【流日${pd}・${flow.short}】給 ${name} 的第 ${progress} 天能量行動提案：${flow.subtitle}`;
-      const html = getFlowDayHtml(progress, name, pd, flow, AGENT_CONFIG);
+      const subject = `🌟 【流日${pd}・${flow.short}】給 ${displayName} 的第 ${progress} 天能量行動提案：${flow.subtitle}`;
+      const html = getFlowDayHtml(progress, displayName, pd, flow, AGENT_CONFIG);
 
       MailApp.sendEmail({ to: email, subject: subject, htmlBody: html });
 
@@ -90,9 +93,9 @@ function dailyCheckAndSend() {
       const nextProgress = progress + 1;
       const nextStatus = nextProgress > 7 ? "已完成" : "發送中";
       
-      sheet.getRange(i + 1, 10).setValue(nextStatus);
-      sheet.getRange(i + 1, 11).setValue(nextProgress);
-      sheet.getRange(i + 1, 12).setValue(todayStr);
+      sheet.getRange(i + 1, 11).setValue(nextStatus);
+      sheet.getRange(i + 1, 12).setValue(nextProgress);
+      sheet.getRange(i + 1, 13).setValue(todayStr);
     }
   }
 }

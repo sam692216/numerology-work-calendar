@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="阿福教練流日能量 - 💬 LINE 官方帳號會員全自動推播系統 (04_Card)">
+    <title>💬 LINE 官方帳號自動推播系統 | 流日能量關懷系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['"Noto Sans TC"', 'sans-serif'] } } }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #090d16 0%, #111827 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(255,255,255,0.035);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .glass-gold {
+            background: rgba(245,158,11,0.07);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(245,158,11,0.2);
+        }
+        .glass-green {
+            background: rgba(6,199,85,0.07);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(6,199,85,0.2);
+        }
+        .input-field {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            background: rgba(255,255,255,0.09);
+            border-color: rgba(6,199,85,0.5);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(6,199,85,0.1);
+        }
+        select option { background: #1e293b; color: #f8fafc; }
+        
+        .tab-btn { transition: all 0.25s; }
+        .tab-btn.active {
+            background: rgba(6,199,85,0.15);
+            border-color: rgba(6,199,85,0.5);
+            color: #22c55e;
+        }
+
+        /* LINE Chat Box Preview Simulation */
+        .line-chat-bg {
+            background-color: #849ebf;
+            background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(6,199,85,0.35); border-radius: 3px; }
+    </style>
+</head>
+<body class="text-white font-sans p-3 sm:p-5 md:p-8">
+<div class="max-w-4xl mx-auto">
+
+    <!-- Top Links -->
+    <div class="mb-5 flex justify-between items-center text-xs sm:text-sm">
+        <a href="../index.html" class="inline-flex items-center gap-1.5 text-slate-400 hover:text-emerald-400 transition">
+            <i class="fa-solid fa-arrow-left text-xs"></i> 主工作曆
+        </a>
+        <div class="flex gap-3">
+            <a href="../01_Card/index.html" class="text-slate-400 hover:text-emerald-400 transition">01_手動版</a>
+            <a href="../02_Card/index.html" class="text-slate-400 hover:text-emerald-400 transition">02_GAS Email版</a>
+            <a href="../03_Card/index.html" class="text-slate-400 hover:text-emerald-400 transition">03_手機錄入器</a>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="text-center mb-8">
+        <div class="inline-flex items-center gap-2 glass-green px-4 py-1.5 rounded-full text-emerald-400 text-xs sm:text-sm font-semibold mb-3">
+            <i class="fa-brands fa-line text-emerald-400 text-base"></i>
+            💬 LINE 官方帳號全自動會員關懷與圖卡推播中樞 (04_Card)
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-black mb-3">
+            <span class="bg-gradient-to-r from-emerald-400 via-green-400 to-amber-300 bg-clip-text text-transparent">LINE 官方帳號自動發卡與圖卡推播系統</span>
+        </h1>
+        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-2xl mx-auto">
+            自動擷取新好友 UID、智慧判定生日與流日關懷，並在 LINE 聊天室自動推播「高質感 Flex 生日卡」與「流日 1~9 實體精美圖卡」！
+        </p>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="flex rounded-2xl glass p-1.5 mb-8 gap-2 font-bold text-xs sm:text-sm">
+        <button id="tabPreviewBtn" onclick="switchTab('preview')" class="tab-btn active flex-1 py-3 rounded-xl flex items-center justify-center gap-2">
+            <i class="fa-brands fa-line"></i> LINE Flex 訊息模擬預覽
+        </button>
+        <button id="tabGasBtn" onclick="switchTab('gas')" class="tab-btn flex-1 py-3 rounded-xl text-slate-400 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-code"></i> 三合一 LINE GAS 腳本與部署說明
+        </button>
+    </div>
+
+    <!-- ── TAB 1: LINE FLEX MESSAGE PREVIEW ── -->
+    <div id="tabPreview" class="space-y-8">
+
+        <!-- Privacy & UID Info Banner -->
+        <div class="glass border-emerald-500/30 bg-emerald-950/20 rounded-2xl p-4 flex items-start gap-3 text-xs text-emerald-300/90 leading-relaxed">
+            <i class="fa-solid fa-shield-halved text-emerald-400 text-lg flex-shrink-0 mt-0.5"></i>
+            <div>
+                <span class="font-bold text-emerald-300 block mb-0.5 text-sm">🔒 自動 UID 擷取與個資安全聲明</span>
+                新客戶加入您的 LINE 官方帳號時，系統會自動在背景取得獨一無二的 **LINE UID** 並填入您的 Google 試算表中。所有客戶名單與互動皆直接發送到您的試算表，絕不上傳中央伺服器！
+            </div>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="glass rounded-2xl p-5 md:p-6 space-y-4">
+            <div class="flex flex-wrap justify-between items-center gap-3">
+                <h2 class="text-emerald-400 font-bold text-base flex items-center gap-2">
+                    <i class="fa-solid fa-sliders"></i> LINE 訊息內容與圖卡切換
+                </h2>
+                <!-- Card Select Buttons -->
+                <div id="msgSelector" class="flex flex-wrap gap-1.5 bg-black/40 p-1.5 rounded-xl border border-white/10 text-xs"></div>
+            </div>
+
+            <!-- Customer Name & Agent Info Preset -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs border-t border-white/10 pt-4">
+                <div>
+                    <label class="block text-slate-400 mb-1">客戶預覽名稱</label>
+                    <input id="previewClientName" type="text" value="大明哥" oninput="updateLinePreview()" class="input-field w-full rounded-lg px-3 py-2 text-white">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">業務員顯示名稱</label>
+                    <input id="previewAgentName" type="text" value="阿福教練" oninput="updateLinePreview()" class="input-field w-full rounded-lg px-3 py-2 text-white">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">所屬通訊處</label>
+                    <input id="previewAgentDept" type="text" value="大勝阿福通" oninput="updateLinePreview()" class="input-field w-full rounded-lg px-3 py-2 text-white">
+                </div>
+            </div>
+        </div>
+
+        <!-- LINE Chat Box Simulator -->
+        <div class="glass rounded-3xl p-4 sm:p-6 max-w-md mx-auto shadow-2xl">
+            <div class="flex items-center justify-between bg-slate-900 px-4 py-2.5 rounded-t-2xl border-b border-slate-800 text-xs text-slate-300">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span class="ml-2 font-bold text-white">阿福教練 LINE 官方帳號</span>
+                </div>
+                <span class="text-[10px] text-slate-400">16:00</span>
+            </div>
+
+            <!-- LINE Chat Screen -->
+            <div class="line-chat-bg p-4 rounded-b-2xl min-h-[500px] flex flex-col justify-start gap-4">
+
+                <!-- Avatar & Message Bubble -->
+                <div class="flex items-start gap-2.5">
+                    <img src="https://share.crm945.com/images/2026/04/09/messageImage_1770878818976.jpg" alt="阿福教練" class="w-9 h-9 rounded-full border-2 border-white object-cover shadow flex-shrink-0">
+                    <div class="space-y-1 max-w-[320px]">
+                        <span class="text-[11px] text-slate-800 font-bold block">阿福教練｜時機管理術</span>
+
+                        <!-- Dynamic Rendered Flex Card Container -->
+                        <div id="lineCardContainer" class="shadow-xl rounded-2xl overflow-hidden"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── TAB 2: GAS CODE & DEPLOY INSTRUCTIONS ── -->
+    <div id="tabGas" class="hidden space-y-8">
+        
+        <!-- 3 Steps Instructions -->
+        <div class="glass rounded-2xl p-6 md:p-8">
+            <h2 class="text-emerald-400 font-bold mb-4 flex items-center gap-2 text-lg">
+                <i class="fa-brands fa-line"></i> LINE 官方帳號與 GAS 5 步驟免費部署指南
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-xs leading-relaxed text-slate-300">
+                <div class="bg-white/5 border border-white/10 p-4 rounded-xl space-y-1.5">
+                    <div class="w-6 h-6 rounded-full bg-emerald-500 text-black font-black flex items-center justify-center mb-1 text-xs">1</div>
+                    <h3 class="font-bold text-white text-sm">申請 LINE 官方帳號與 Messaging API</h3>
+                    <p class="text-slate-400">前往 LINE Developers 主控台，建立 Provider 並開啟 Messaging API，取得 **Channel Access Token**。</p>
+                </div>
+
+                <div class="bg-white/5 border border-white/10 p-4 rounded-xl space-y-1.5">
+                    <div class="w-6 h-6 rounded-full bg-emerald-500 text-black font-black flex items-center justify-center mb-1 text-xs">2</div>
+                    <h3 class="font-bold text-white text-sm">貼入下方三合一 GAS 腳本</h3>
+                    <p class="text-slate-400">開啟 Google 試算表 ➔「擴充功能」➔「Apps Script」，把下方腳本複製貼上，並修改頂部的 `AGENT_CONFIG` 與 `LINE_ACCESS_TOKEN`。</p>
+                </div>
+
+                <div class="bg-white/5 border border-white/10 p-4 rounded-xl space-y-1.5">
+                    <div class="w-6 h-6 rounded-full bg-emerald-500 text-black font-black flex items-center justify-center mb-1 text-xs">3</div>
+                    <h3 class="font-bold text-white text-sm">部署 Web App 並選擇所有人</h3>
+                    <p class="text-slate-400">點擊右上「部署」➔「新增部署作業」➔ 選擇「Web 應用程式」，存取權選 **「所有人 (Anyone)」** 並複製獲得的 URL。</p>
+                </div>
+
+                <div class="bg-white/5 border border-white/10 p-4 rounded-xl space-y-1.5">
+                    <div class="w-6 h-6 rounded-full bg-emerald-500 text-black font-black flex items-center justify-center mb-1 text-xs">4</div>
+                    <h3 class="font-bold text-white text-sm">貼回 LINE Webhook URL 啟用網址</h3>
+                    <p class="text-slate-400">把 GAS Web App URL 貼回 LINE Developers 的 Webhook URL 欄位並點擊【Use Webhook】啟用驗證。</p>
+                </div>
+            </div>
+
+            <!-- CSV / Sheet Header copy -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-xs font-bold text-slate-300">📋 Google 試算表第一行標準欄位 (點擊複製)</label>
+                    <button onclick="copyText('headerText')" class="text-xs text-emerald-400 hover:underline"><i class="fa-regular fa-copy"></i> 複製欄位</button>
+                </div>
+                <input id="headerText" readonly type="text" value="LINE_UID	LINE顯示名稱	客戶姓名	客戶暱稱	手機	Email	所屬區域	生日月	生日日	備註	自動發送狀態	當前發送進度	最後發送日期" class="input-field w-full rounded-xl px-4 py-2.5 text-xs text-slate-300 select-all font-mono">
+            </div>
+
+            <!-- Code Block -->
+            <div class="relative">
+                <div class="flex justify-between items-center bg-slate-900 border-t border-x border-slate-700/60 rounded-t-xl px-4 py-2.5">
+                    <span class="text-xs text-slate-400 font-mono"><i class="fa-brands fa-js mr-1.5 text-yellow-400"></i>line_gas_script.js (包含 doPost + 圖片推播 + 自動抓UID)</span>
+                    <button onclick="copyText('lineGasCodeBlock')" class="text-xs bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 px-3 py-1 rounded-lg transition"><i class="fa-regular fa-copy mr-1"></i>複製完整 LINE GAS 腳本</button>
+                </div>
+                <textarea id="lineGasCodeBlock" readonly class="w-full h-96 bg-slate-950 border border-slate-700/60 rounded-b-xl p-4 text-xs font-mono text-slate-300 leading-relaxed resize-none focus:outline-none"></textarea>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DATA & STATE
+// ═══════════════════════════════════════════════
+let activeMsgIndex = 0; // 0 = Birthday Flex, 1-9 = Flow 1-9
+const GITHUB_IMG_BASE = "https://sam692216.github.io/numerology-work-calendar/04_Card/images/";
+
+const workflowData = {
+    1: { name:"破局與開創日", subtitle:"舒適圈粉碎", short:"破局", tagline:"不用等待許可，今天你就是自己生命中最強大的貴人！", quote:"「在猶豫中等待機會，不如用勇敢劈開第一道曙光！今天不設限，我的獨立與果斷，就是最強大的開創磁場。」", tip:"眼前的機會絕不猶豫，今天必須拿出勇氣、獨立出擊，播下最勇敢的種子。", checklist:["今天有沒有做一件平時最不敢做的勇敢嘗試？","面對機會，有沒有當機立斷「立刻行動」？"] },
+    2: { name:"借力與傾聽日", subtitle:"溫柔凝聚力", short:"借力", tagline:"收起鋒芒、張開雙耳。學會借力，才是最高明的大格局。", quote:"「平時靠實力，今天靠魅力與聽力。縮小自己、放大對方，用最高級的溫柔凝聚全宇宙的人脈複利！」", tip:"今天最強大的力量，是靜靜傾聽對方說的每一句話。", checklist:["今天有沒有忍住說話衝動，好好把對方的話聽完？","有沒有真誠表達感謝，讓對方感受到被重視？"] },
+    3: { name:"表達與促成日", subtitle:"創意渲染力", short:"促成", tagline:"用創意的糖衣，包裹理性的專業；你的快樂就是最強大的促成力！", quote:"「不嚴肅、不糾結！今天我是自己舞台的發表者，用最陽光的笑容去利他，把熱情化為現實的黃金成果。」", tip:"今天的你，就是最有感染力的那個人。展現快樂，就能感染身邊所有人！", checklist:["今天有沒有釋放出樂觀、喜悅的正向能量？","面對卡關，有沒有用幽默或創意的方式嘗試突破？"] },
+    4: { name:"務實與扎根日", subtitle:"信任落地方案", short:"扎根", tagline:"不給模糊承諾，答應的事精準做到；用無懈可擊的誠信築起護城河！", quote:"「今天不浮誇、不浮躁！用最扎實的行動與誠信，將善緣化為最讓人安心的長久關係。」", tip:"今天做的每一件踏實小事，都是未來最穩固的基石。", checklist:["今天答應別人的事，有沒有精準做到，不留模糊空間？","待辦事項和重要環境，今天是否有確實整理？"] },
+    5: { name:"跨界與突破日", subtitle:"打破舒適圈", short:"擴張", tagline:"守成就是最大的風險！帶著破局之翼，讓遠大願景飛越一切限制。", quote:"「拒絕無效瞎忙，大膽打破現狀！今天我不設限，我的勇敢與跨界，就是最強大的擴張磁場。」", tip:"今天做一件讓自己稍微不舒服但充滿可能性的新嘗試！", checklist:["今天有沒有主動走向新環境或接觸新朋友？","有沒有拒絕一件低效的事，把時間留給真正重要的目標？"] },
+    6: { name:"擔當與修復日", subtitle:"智慧與大愛", short:"修復", tagline:"用一肩扛起責任的肩膀修復卡關；你的擔當，就是最療癒的磁場！", quote:"「不怕麻煩、主動站出來！用超越期待的責任心，將眼前的困境轉化為彼此一輩子的深厚信任。」", tip:"今天用愛與責任修復所有卡關，你的擔當就是最美的力量。", checklist:["面對難題，有沒有第一時間勇敢說「我來處理」？","今天有沒有讓身邊焦慮的人，因自己而重獲平靜？"] },
+    7: { name:"底層邏輯與請益日", subtitle:"軍師智慧", short:"貴人", tagline:"用清晰的眼光看透真相；以謙遜請益，借力生命中的頂級貴人。", quote:"「今天不盲從、不浮躁！退回大後方深度整理，我的清明與深度，就是吸引最強高階貴人的磁場。」", tip:"今天把時間留給深度思考，一個清晰的決策，勝過百個倉促的行動。", checklist:["今天有沒有用邏輯與理性做重要決定？","有沒有主動向比自己厲害的人學習或請益？"] },
+    8: { name:"主導與顯化日", subtitle:"黃金收割", short:"收割", tagline:"理直氣壯展現自己！換上戰袍，完成最高規格的豐盛顯化。", quote:"「收起不好意思的心態！今天用最強大的領袖氣場與利他心，理直氣壯地將善緣轉化為實質的豐盛果實。」", tip:"今天換上自信的戰袍，大聲說出自己的價值！你值得擁有最好的。", checklist:["今天有沒有展現出自信的氣場，拿回自己的主導權？","有沒有果斷推動一件重要的事，讓它真正落地？"] },
+    9: { name:"圓滿與斷捨離日", subtitle:"奇蹟藍圖", short:"圓滿", tagline:"帶著豁達感恩完美收網；果斷清空記憶體，預約下一個奇蹟！", quote:"「向舊世界優雅告別！今天我不糾結、不留戀，用豁達與純粹利他，迎接下一個大循環的奇蹟新局。」", tip:"今天帶著感恩完美結尾，然後勇敢放手，讓更好的事物到來。", checklist:["今天有沒有把卡關或懸而未決的事，追蹤到底、完美結案？","有沒有勇敢放下一個消耗自己的事物，清空大腦記憶體？"] }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderSelectorPills();
+    updateLinePreview();
+    populateGasScriptCode();
+});
+
+function switchTab(tab) {
+    document.getElementById('tabPreview').classList.toggle('hidden', tab !== 'preview');
+    document.getElementById('tabGas').classList.toggle('hidden', tab !== 'gas');
+    document.getElementById('tabPreviewBtn').classList.toggle('active', tab === 'preview');
+    document.getElementById('tabGasBtn').classList.toggle('active', tab === 'gas');
+}
+
+function renderSelectorPills() {
+    const container = document.getElementById('msgSelector');
+    container.innerHTML = '';
+
+    const items = [
+        { label: "🎂 生日卡 Flex", idx: 0 },
+        { label: "Day 1 (圖卡1)", idx: 1 },
+        { label: "Day 2 (圖卡2)", idx: 2 },
+        { label: "Day 3 (圖卡3)", idx: 3 },
+        { label: "Day 4 (圖卡4)", idx: 4 },
+        { label: "Day 5 (圖卡5)", idx: 5 },
+        { label: "Day 6 (圖卡6)", idx: 6 },
+        { label: "Day 7 (圖卡7)", idx: 7 },
+        { label: "圖卡 8", idx: 8 },
+        { label: "圖卡 9", idx: 9 }
+    ];
+
+    items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = `px-3 py-1.5 rounded-lg font-bold transition ${
+            item.idx === activeMsgIndex 
+                ? 'bg-emerald-500 text-black shadow-sm' 
+                : 'text-slate-400 hover:text-white hover:bg-white/10'
+        }`;
+        btn.textContent = item.label;
+        btn.onclick = () => {
+            activeMsgIndex = item.idx;
+            renderSelectorPills();
+            updateLinePreview();
+        };
+        container.appendChild(btn);
+    });
+}
+
+function updateLinePreview() {
+    const container = document.getElementById('lineCardContainer');
+    const cName = document.getElementById('previewClientName').value.trim() || '大明哥';
+    const aName = document.getElementById('previewAgentName').value.trim() || '阿福教練';
+    const aDept = document.getElementById('previewAgentDept').value.trim() || '大勝阿福通';
+
+    if (activeMsgIndex === 0) {
+        // 🎂 Option A: LINE Flex Birthday Card
+        container.innerHTML = `
+            <div class="bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 text-white rounded-2xl overflow-hidden border border-purple-500/30">
+                <div class="p-6 text-center space-y-3 bg-gradient-to-b from-purple-500/20 to-transparent">
+                    <div class="text-5xl animate-bounce">🎂</div>
+                    <div class="text-amber-300 font-bold text-xs tracking-widest uppercase">Happy Birthday</div>
+                    <h3 class="text-xl font-black text-white">祝 ${cName} 生日快樂！</h3>
+                    <p class="text-xs text-purple-200 leading-relaxed">在這個特別的日子裡，獻上最真摯的祝福與專屬流年洞察 🌟</p>
+                </div>
+                
+                <div class="p-5 space-y-3 bg-slate-950/60 border-t border-purple-500/20 text-xs">
+                    <div class="bg-purple-950/50 border-l-4 border-purple-400 p-3 rounded-r-xl">
+                        <span class="text-[10px] font-bold text-purple-300 uppercase block mb-1">✨ 年度流年能量提示</span>
+                        <div class="font-bold text-white text-sm">今年您進入「開創播種之年」</div>
+                        <p class="text-slate-300 text-[11px] mt-1">嶄新的能量週期正在開啟！勇於行動、播下夢想種子。</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 p-4 border-t border-slate-800 flex justify-between items-center text-xs">
+                    <div>
+                        <div class="font-bold text-amber-400">${aName}</div>
+                        <div class="text-[10px] text-slate-400">${aDept}</div>
+                    </div>
+                    <button class="bg-emerald-500 hover:bg-emerald-400 text-black font-black px-4 py-2 rounded-full text-xs transition shadow">
+                        <i class="fa-brands fa-line mr-1"></i> LINE 預約諮詢
+                    </button>
+                </div>
+            </div>
+        `;
+    } else {
+        // 🌟 Option: Flow 1-9 Image + Flex Message Card
+        const pd = activeMsgIndex;
+        const flow = workflowData[pd];
+        const imgUrl = `${GITHUB_IMG_BASE}flow${pd}.png`;
+
+        const cl = (flow.checklist||[]).map(c=>`<li class="flex items-center gap-1.5 mb-1"><i class="fa-solid fa-check text-emerald-400 text-[10px]"></i>${c}</li>`).join('');
+
+        container.innerHTML = `
+            <div class="bg-slate-900 text-white rounded-2xl overflow-hidden border border-slate-700/60 space-y-0">
+                <!-- 1. Real Uploaded Flow Image -->
+                <div class="relative bg-black">
+                    <img src="${imgUrl}" alt="流日${pd}圖卡" class="w-full h-auto object-cover max-h-64">
+                    <span class="absolute top-3 right-3 bg-amber-500 text-black font-black text-xs px-2.5 py-1 rounded-full shadow">
+                        流日 ${pd}・${flow.short}
+                    </span>
+                </div>
+
+                <!-- 2. Text & Checklist Box -->
+                <div class="p-4 space-y-3 text-xs leading-relaxed">
+                    <div class="text-amber-400 font-bold text-sm">【${flow.name}】${flow.subtitle}</div>
+                    <div class="text-slate-200 font-bold text-xs">${flow.tagline}</div>
+                    <div class="text-slate-400 italic text-[11px] border-l-2 border-amber-400 pl-2">
+                        ${flow.quote}
+                    </div>
+
+                    <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 space-y-1 text-[11px]">
+                        <div class="font-bold text-emerald-400 mb-1"><i class="fa-solid fa-compass mr-1"></i>夜間 21:00 檢視提案</div>
+                        <ul class="text-slate-300">${cl}</ul>
+                    </div>
+                </div>
+
+                <!-- 3. Agent Footer Button -->
+                <div class="bg-slate-950 p-3.5 border-t border-slate-800 flex justify-between items-center text-xs">
+                    <div>
+                        <div class="font-bold text-amber-400">${aName}</div>
+                        <div class="text-[10px] text-slate-400">${aDept}</div>
+                    </div>
+                    <button class="bg-emerald-500 hover:bg-emerald-400 text-black font-black px-4 py-2 rounded-full text-xs transition shadow">
+                        <i class="fa-brands fa-line mr-1"></i> LINE 預約諮詢
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// ═══════════════════════════════════════════════
+// THREE-IN-ONE LINE GAS SCRIPT GENERATOR
+// ═══════════════════════════════════════════════
+function populateGasScriptCode() {
+    const lines = [
+      '/**',
+      ' * 阿福教練 - 三合一 LINE 官方帳號全自動關懷與圖卡推播腳本',
+      ' * 請將此腳本貼入 Google 試算表的 Apps Script 中',
+      ' */',
+      '',
+      '// 1. 金鑰與業務員個人化設定',
+      'const LINE_ACCESS_TOKEN = "您的_LINE_CHANNEL_ACCESS_TOKEN"; // 貼入 LINE Developers 獲得的 Token',
+      'const AGENT_CONFIG = {',
+      '  name: "阿福教練",',
+      '  dept: "大勝阿福通",',
+      '  phone: "0988-777-666",',
+      '  lineUrl: "https://line.me/ti/p/~afu168"',
+      '};',
+      '',
+      'const GITHUB_IMG_BASE = "https://sam692216.github.io/numerology-work-calendar/04_Card/images/";',
+      '',
+      '// 2. LINE Webhook API 接收器 (當好友加入或傳訊息時自動抓取 UID)',
+      'function doPost(e) {',
+      '  try {',
+      '    const json = JSON.parse(e.postData.contents);',
+      '    const events = json.events;',
+      '    if (!events || events.length === 0) return replyOk();',
+      '',
+      '    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();',
+      '    const today = new Date();',
+      '    const tY = today.getFullYear();',
+      '    const tM = today.getMonth() + 1;',
+      '    const tD = today.getDate();',
+      '    const todayStr = tY + "-" + tM + "-" + tD;',
+      '',
+      '    events.forEach(function(event) {',
+      '      const userId = event.source.userId;',
+      '      if (!userId) return;',
+      '      ',
+      '      // 檢查試算表中是否已存在此 UID',
+      '      const data = sheet.getDataRange().getValues();',
+      '      let existsIndex = -1;',
+      '      for (let i = 1; i < data.length; i++) {',
+      '        if (data[i][0] === userId) { existsIndex = i; break; }',
+      '      }',
+      '',
+      '      // 抓取用戶 LINE Profile 暱稱',
+      '      const profile = getLineProfile(userId);',
+      '      const lineName = profile ? profile.displayName : "LINE好友";',
+      '',
+      '      if (existsIndex === -1) {',
+      '        // 新客戶加入 ➔ 自動新增一列',
+      '        sheet.appendRow([',
+      '          userId,      // A: LINE UID',
+      '          lineName,    // B: LINE顯示名稱',
+      '          lineName,    // C: 客戶姓名',
+      '          lineName,    // D: 客戶暱稱',
+      '          "",          // E: 手機',
+      '          "",          // F: Email',
+      '          "其他",       // G: 區域',
+      '          tM,          // H: 生日月 (預設帶入本月)',
+      '          tD,          // I: 生日日 (預設帶入今日)',
+      '          "來自 LINE 官方帳號", // J: 備註',
+      '          "排程中",     // K: 自動發送狀態',
+      '          0,           // L: 發送進度',
+      '          ""           // M: 最後發送日期',
+      '        ]);',
+      '        ',
+      '        // 回覆歡迎與性性連結',
+      '        replyLineMessage(event.replyToken, "👋 歡迎加入阿福教練！已為您登記會員卡，請聯繫業務員設定您的專屬生日資訊。");',
+      '      }',
+      '    });',
+      '',
+      '    return replyOk();',
+      '  } catch(err) {',
+      '    return replyOk();',
+      '  }',
+      '}',
+      '',
+      '// 3. 每日 08:00 自動檢查與 LINE Push 圖卡推播',
+      'function dailyLinePushCheck() {',
+      '  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();',
+      '  const data = sheet.getDataRange().getValues();',
+      '  if (data.length <= 1) return;',
+      '',
+      '  const today = new Date();',
+      '  const tY = today.getFullYear();',
+      '  const tM = today.getMonth() + 1;',
+      '  const tD = today.getDate();',
+      '  const todayStr = tY + "-" + tM + "-" + tD;',
+      '',
+      '  for (let i = 1; i < data.length; i++) {',
+      '    const row = data[i];',
+      '    const uid = row[0];        // A: LINE UID',
+      '    const name = row[2];       // C: 姓名',
+      '    const nickname = row[3];   // D: 暱稱',
+      '    const bM = parseInt(row[7]);// H: 生日月',
+      '    const bD = parseInt(row[8]);// I: 生日日',
+      '    let status = row[10];      // K: 自動發送狀態',
+      '    let progress = parseInt(row[11]) || 0; // L: 發送進度',
+      '    let lastDate = row[12];    // M: 最後發送日期',
+      '',
+      '    if (!uid || !bM || !bD) continue;',
+      '    if (status === "暫停" || status === "已完成") continue;',
+      '    if (lastDate === todayStr) continue;',
+      '',
+      '    const displayName = (nickname && String(nickname).trim()) ? String(nickname).trim() : name;',
+      '',
+      '    // 檢查狀況 1：今天是否生日？ ➔ 發送 Flex 生日卡 (方案 A 免做圖)',
+      '    if (tM === bM && tD === bD && progress === 0) {',
+      '      const py = getPY(tY, tM, bM, bD);',
+      '      const flexMsg = buildBirthdayFlexMessage(displayName, py);',
+      '      sendLinePush(uid, flexMsg);',
+      '      ',
+      '      sheet.getRange(i + 1, 11).setValue("發送中");',
+      '      sheet.getRange(i + 1, 12).setValue(1);',
+      '      sheet.getRange(i + 1, 13).setValue(todayStr);',
+      '      continue;',
+      '    }',
+      '',
+      '    // 檢查狀況 2：連續 7 天流日發送 (進度 1~7) ➔ 推播 1~9 精美實體圖卡 + Flex 訊息',
+      '    if (progress >= 1 && progress <= 7) {',
+      '      const py = getPY(tY, tM, bM, bD);',
+      '      const pm = getPM(py, tM);',
+      '      const pd = getPD(pm, tD);',
+      '      const flow = workflowData[pd];',
+      '      const imgUrl = GITHUB_IMG_BASE + "flow" + pd + ".png";',
+      '      const flexMsg = buildFlowFlexMessage(progress, displayName, pd, flow, imgUrl);',
+      '      sendLinePush(uid, flexMsg);',
+      '',
+      '      const nextProgress = progress + 1;',
+      '      const nextStatus = nextProgress > 7 ? "已完成" : "發送中";',
+      '      sheet.getRange(i + 1, 11).setValue(nextStatus);',
+      '      sheet.getRange(i + 1, 12).setValue(nextProgress);',
+      '      sheet.getRange(i + 1, 13).setValue(todayStr);',
+      '    }',
+      '  }',
+      '}',
+      '',
+      '// 4. LINE Messaging API 工具函式',
+      'function sendLinePush(uid, flexMsg) {',
+      '  UrlFetchApp.fetch("https://api.line.me/v2/bot/message/push", {',
+      '    method: "post",',
+      '    headers: {',
+      '      "Content-Type": "application/json",',
+      '      "Authorization": "Bearer " + LINE_ACCESS_TOKEN',
+      '    },',
+      '    payload: JSON.stringify({ to: uid, messages: [flexMsg] })',
+      '  });',
+      '}',
+      '',
+      'function replyLineMessage(replyToken, text) {',
+      '  UrlFetchApp.fetch("https://api.line.me/v2/bot/message/reply", {',
+      '    method: "post",',
+      '    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + LINE_ACCESS_TOKEN },',
+      '    payload: JSON.stringify({ replyToken: replyToken, messages: [{ type: "text", text: text }] })',
+      '  });',
+      '}',
+      '',
+      'function getLineProfile(uid) {',
+      '  try {',
+      '    const res = UrlFetchApp.fetch("https://api.line.me/v2/bot/profile/" + uid, {',
+      '      headers: { "Authorization": "Bearer " + LINE_ACCESS_TOKEN }',
+      '    });',
+      '    return JSON.parse(res.getContentText());',
+      '  } catch(e) { return null; }',
+      '}',
+      '',
+      'function replyOk() {',
+      '  return ContentService.createTextOutput(JSON.stringify({status: "ok"})).setMimeType(ContentService.MimeType.JSON);',
+      '}',
+      '',
+      '// 5. LINE Flex Message 建構器',
+      'function buildBirthdayFlexMessage(name, py) {',
+      '  return {',
+      '    type: "flex",',
+      '    altText: "🎂 祝 " + name + " 生日快樂！專屬流年祝福 🌟",',
+      '    contents: {',
+      '      type: "bubble",',
+      '      styles: { header: { backgroundColor: "#312e81" }, body: { backgroundColor: "#0f172a" }, footer: { backgroundColor: "#020617" } },',
+      '      header: { type: "box", layout: "vertical", contents: [{ type: "text", text: "🎂 HAPPY BIRTHDAY", color: "#fbbf24", weight: "bold", size: "xs" }, { type: "text", text: "祝 " + name + " 生日快樂！", color: "#ffffff", weight: "bold", size: "xl", margin: "sm" }] },',
+      '      body: { type: "box", layout: "vertical", contents: [{ type: "text", text: "✨ 您的年度流年能量洞察", color: "#c084fc", size: "xs", weight: "bold" }, { type: "text", text: "今年您進入「流年 " + py + "」能量週期", color: "#ffffff", weight: "bold", size: "md", margin: "xs" }] },',
+      '      footer: { type: "box", layout: "vertical", contents: [{ type: "button", action: { type: "uri", label: "LINE 諮詢 / 預約", uri: AGENT_CONFIG.lineUrl }, style: "primary", color: "#22c55e" }] }',
+      '    }',
+      '  };',
+      '}',
+      '',
+      'function buildFlowFlexMessage(n, name, pd, flow, imgUrl) {',
+      '  return {',
+      '    type: "flex",',
+      '    altText: "🌟 【流日" + pd + "・" + flow.short + "】給 " + name + " 的第 " + n + " 天能量行動提案",',
+      '    contents: {',
+      '      type: "bubble",',
+      '      hero: { type: "image", url: imgUrl, size: "full", aspectRatio: "1.91:1", aspectMode: "cover" },',
+      '      body: { type: "box", layout: "vertical", contents: [{ type: "text", text: "【" + flow.name + "】" + flow.subtitle, color: "#fbbf24", weight: "bold", size: "sm" }, { type: "text", text: flow.tagline, color: "#ffffff", weight: "bold", size: "md", margin: "xs" }] },',
+      '      footer: { type: "box", layout: "vertical", contents: [{ type: "button", action: { type: "uri", label: "LINE 諮詢 / 預約", uri: AGENT_CONFIG.lineUrl }, style: "primary", color: "#22c55e" }] }',
+      '    }',
+      '  };',
+      '}',
+      '',
+      'function dr(n) { return n === 0 ? 0 : (n - 1) % 9 + 1; }',
+      'function getPY(tY, tM, bM, bD) { return dr((tM < bM ? tY - 1 : tY) + bM + bD); }',
+      'function getPM(pY, cM) { return dr(pY + cM); }',
+      'function getPD(pM, cD) { return dr(pM + cD); }',
+      '',
+      'const workflowData = {',
+      '  1:{name:"破局與開創日",subtitle:"舒適圈粉碎",short:"破局",tagline:"不用等待許可，今天你就是自己生命中最強大的貴人！"},',
+      '  2:{name:"借力與傾聽日",subtitle:"溫柔凝聚力",short:"借力",tagline:"收起鋒芒、張開雙耳。學會借力，才是最高明的大格局。"},',
+      '  3:{name:"表達與促成日",subtitle:"創意渲染力",short:"促成",tagline:"用創意的糖衣，包裹理性的專業；你的快樂就是最強大的促成力！"},',
+      '  4:{name:"務實與扎根日",subtitle:"信任落地方案",short:"扎根",tagline:"不給模糊承諾，答應的事精準做到；用無懈可擊的誠信築起護城河！"},',
+      '  5:{name:"跨界與突破日",subtitle:"打破舒適圈",short:"擴張",tagline:"守成就是最大的風險！帶著破局之翼，讓遠大願景飛越一切限制。"},',
+      '  6:{name:"擔當與修復日",subtitle:"智慧與大愛",short:"修復",tagline:"用一肩扛起責任的肩膀修復卡關；你的擔當，就是最療癒的磁場！"},',
+      '  7:{name:"底層邏輯與請益日",subtitle:"軍師智慧",short:"貴人",tagline:"用清晰的眼光看透真相；以謙遜請益，借力生命中的頂級貴人。"},',
+      '  8:{name:"主導與顯化日",subtitle:"黃金收割",short:"收割",tagline:"理直氣壯展現自己！換上戰袍，完成最高規格的豐盛顯化。"},',
+      '  9:{name:"圓滿與斷捨離日",subtitle:"奇蹟藍圖",short:"圓滿",tagline:"帶著豁達感恩完美收網；果斷清空記憶體，預約下一個奇蹟！"}',
+      '};'
+    ];
+
+    document.getElementById('lineGasCodeBlock').value = lines.join('\n');
+}
+
+function copyText(id) {
+    const el = document.getElementById(id);
+    el.select();
+    document.execCommand('copy');
+    alert('已成功複製完整 LINE GAS 腳本！');
+}
+</script>
+</body>
+</html>

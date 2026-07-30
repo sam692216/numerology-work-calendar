@@ -7,7 +7,7 @@
 const AGENT_CONFIG = {
   senderName: "阿福教練｜流日能量關懷", // 客戶收件匣看到的寄件者顯示名稱
   name: "阿福教練",
-  dept: "富邦人壽 嘉義興業通訊處",
+  dept: "大勝阿福通",
   phone: "0988-777-666",
   lineUrl: "https://line.me/ti/p/~afu168"
 };

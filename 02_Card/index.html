@@ -102,11 +102,25 @@
     <!-- ── TAB 1: PREVIEW & FORM ── -->
     <div id="tabPreview" class="space-y-8">
         
+        <!-- Privacy Notice Banner -->
+        <div class="glass border-emerald-500/30 bg-emerald-950/20 rounded-2xl p-4 flex items-start gap-3.5 text-xs text-emerald-300/90 leading-relaxed">
+            <i class="fa-solid fa-shield-halved text-emerald-400 text-lg flex-shrink-0 mt-0.5"></i>
+            <div>
+                <span class="font-bold text-emerald-300 block mb-0.5 text-sm">🔒 資安與個資保護承諾</span>
+                本工具為純前端沙盒（Client-Side Only），您輸入的任何客戶資料與個人設定**僅存於您目前的瀏覽器記憶體中**，絕不上傳或儲存至任何伺服器。其他使用者開啟網頁絕對無法取得您的資料，請安心使用。
+            </div>
+        </div>
+
         <!-- Input Form Section -->
         <div class="glass rounded-2xl p-6 md:p-8">
-            <h2 class="text-amber-400 font-bold mb-6 flex items-center gap-2 text-lg">
-                <i class="fa-solid fa-sliders"></i> 客戶與業務員資料預覽設定
-            </h2>
+            <div class="flex flex-wrap justify-between items-center mb-6 gap-3">
+                <h2 class="text-amber-400 font-bold flex items-center gap-2 text-lg">
+                    <i class="fa-solid fa-sliders"></i> 客戶與業務員資料預覽設定
+                </h2>
+                <button id="resetFormBtn" onclick="resetFormToDefault()" class="text-xs text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left"></i> 重置為預設範例
+                </button>
+            </div>
 
             <!-- Section 1: Client Info -->
             <div class="mb-6">
@@ -153,18 +167,9 @@
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">生日 (月) *</label>
                         <select id="birthMonth" class="input-field w-full rounded-xl px-3.5 py-2.5 text-white text-sm">
-                            <option value="1">1 月</option>
-                            <option value="2">2 月</option>
-                            <option value="3">3 月</option>
-                            <option value="4">4 月</option>
-                            <option value="5">5 月</option>
-                            <option value="6">6 月</option>
-                            <option value="7">7 月</option>
-                            <option value="8" selected>8 月</option>
-                            <option value="9">9 月</option>
-                            <option value="10">10 月</option>
-                            <option value="11">11 月</option>
-                            <option value="12">12 月</option>
+                            <option value="1">1 月</option><option value="2">2 月</option><option value="3">3 月</option><option value="4">4 月</option><option value="5">5 月</option>
+                            <option value="6">6 月</option><option value="7">7 月</option><option value="8" selected>8 月</option><option value="9">9 月</option><option value="10">10 月</option>
+                            <option value="11">11 月</option><option value="12">12 月</option>
                         </select>
                     </div>
                     <div>
@@ -202,7 +207,7 @@
                     </div>
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">所屬通訊處 *</label>
-                        <input id="agentDept" type="text" value="富邦人壽 嘉義興業通訊處" class="input-field w-full rounded-xl px-3.5 py-2.5 text-white text-sm">
+                        <input id="agentDept" type="text" value="大勝阿福通" class="input-field w-full rounded-xl px-3.5 py-2.5 text-white text-sm">
                     </div>
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">聯絡電話 *</label>
@@ -400,17 +405,39 @@ function switchTab(tab) {
 // ═══════════════════════════════════════════════
 // EMAIL HTML GENERATOR (USED FOR LIVE PREVIEW)
 // ═══════════════════════════════════════════════
+function resetFormToDefault() {
+    document.getElementById('clientName').value = '陳大明';
+    document.getElementById('clientNickname').value = '大明哥';
+    document.getElementById('clientCompany').value = '創峰科技';
+    document.getElementById('clientDept').value = '台南特區通訊處';
+    document.getElementById('clientPhone').value = '0912-345-678';
+    document.getElementById('clientEmail').value = 'daming@example.com';
+    document.getElementById('clientRegion').value = '台南';
+    document.getElementById('birthMonth').value = '8';
+    updateDays();
+    document.getElementById('birthDay').value = '15';
+    document.getElementById('clientNote').value = 'VIP客戶 / 喜歡喝拿鐵';
+
+    document.getElementById('agentSenderName').value = '阿福教練｜流日能量關懷';
+    document.getElementById('agentName').value = '阿福教練';
+    document.getElementById('agentDept').value = '大勝阿福通';
+    document.getElementById('agentPhone').value = '0988-777-666';
+    document.getElementById('agentLine').value = 'https://line.me/ti/p/~afu168';
+
+    renderAll();
+}
+
 function renderAll() {
     const cnRaw = document.getElementById('clientName').value.trim() || '尊榮客戶';
     const cnNick = document.getElementById('clientNickname').value.trim();
-    const cn = cnNick || cnRaw; // 優先使用暱稱
+    const cn = cnNick || cnRaw;
     const bM = parseInt(selMonth.value) || 8;
     const bD = parseInt(selDay.value) || 15;
 
     const agent = {
         senderName: document.getElementById('agentSenderName').value.trim() || '阿福教練｜流日能量關懷',
         name: document.getElementById('agentName').value.trim() || '阿福教練',
-        dept: document.getElementById('agentDept').value.trim() || '富邦人壽 嘉義興業通訊處',
+        dept: document.getElementById('agentDept').value.trim() || '大勝阿福通',
         phone: document.getElementById('agentPhone').value.trim() || '0988-777-666',
         line: document.getElementById('agentLine').value.trim() || 'https://line.me'
     };

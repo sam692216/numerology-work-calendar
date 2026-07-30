@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="阿福教練流日能量 - 📱 手機/平板極速客戶名單錄入表單 (03_Card)">
+    <title>📱 手機極速名單錄入器 | 流日能量關懷系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QR Code generator library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['"Noto Sans TC"', 'sans-serif'] } } }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #090d16 0%, #111827 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(255,255,255,0.035);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .glass-gold {
+            background: rgba(245,158,11,0.07);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(245,158,11,0.2);
+        }
+        .input-field {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            background: rgba(255,255,255,0.09);
+            border-color: rgba(245,158,11,0.5);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(245,158,11,0.1);
+        }
+        select option { background: #1e293b; color: #f8fafc; }
+        
+        .tab-btn { transition: all 0.25s; }
+        .tab-btn.active {
+            background: rgba(245,158,11,0.15);
+            border-color: rgba(245,158,11,0.5);
+            color: #fbbf24;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(245,158,11,0.35); border-radius: 3px; }
+    </style>
+</head>
+<body class="text-white font-sans p-3 sm:p-5 md:p-8">
+<div class="max-w-xl mx-auto">
+
+    <!-- Top Links -->
+    <div class="mb-5 flex justify-between items-center text-xs sm:text-sm">
+        <a href="../index.html" class="inline-flex items-center gap-1.5 text-slate-400 hover:text-amber-400 transition">
+            <i class="fa-solid fa-arrow-left text-xs"></i> 主工作曆
+        </a>
+        <div class="flex gap-3">
+            <a href="../01_Card/index.html" class="text-slate-400 hover:text-amber-400 transition">01_手動版</a>
+            <a href="../02_Card/index.html" class="text-slate-400 hover:text-amber-400 transition">02_GAS發信版</a>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="text-center mb-6">
+        <div class="inline-flex items-center gap-2 glass-gold px-3.5 py-1.5 rounded-full text-amber-400 text-xs sm:text-sm font-semibold mb-3">
+            <i class="fa-solid fa-mobile-screen-button text-amber-400"></i>
+            📱 行動端極速客戶錄入器 (03_Card)
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-black mb-2">
+            <span class="bg-gradient-to-r from-amber-300 via-amber-400 to-orange-500 bg-clip-text text-transparent">手機/平板客戶名單表單</span>
+        </h1>
+        <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-md mx-auto">
+            在外跑業務免開試算表！點幾下即可直連雲端完成建檔，自動標註「排程中」，明天 08:00 自動寄發流日卡片！
+        </p>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="flex rounded-xl glass p-1 mb-6 gap-1.5 text-xs sm:text-sm font-bold">
+        <button id="tabFormBtn" onclick="switchTab('form')" class="tab-btn active flex-1 py-2.5 rounded-lg flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-user-plus text-amber-400"></i> 新增名單表單
+        </button>
+        <button id="tabSettingsBtn" onclick="switchTab('settings')" class="tab-btn flex-1 py-2.5 rounded-lg text-slate-400 flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-gear"></i> GAS 網址與教學
+        </button>
+    </div>
+
+    <!-- ── TAB 1: FORM INPUT ── -->
+    <div id="tabForm" class="space-y-6">
+
+        <!-- Status Banner -->
+        <div id="urlStatusBanner" class="glass border-amber-500/30 bg-amber-950/20 rounded-2xl p-4 flex items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2.5">
+                <i id="statusIcon" class="fa-solid fa-circle-exclamation text-amber-400 text-base flex-shrink-0"></i>
+                <div>
+                    <span id="statusTitle" class="font-bold text-amber-300 block">尚未設定 Google 雲端網址</span>
+                    <span id="statusDesc" class="text-slate-400 text-[11px]">請先切換至「GAS 網址與教學」頁籤設定貼入網址。</span>
+                </div>
+            </div>
+            <button onclick="switchTab('settings')" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 rounded-lg font-bold text-xs flex-shrink-0 transition">
+                前往設定
+            </button>
+        </div>
+
+        <!-- Main Form Card -->
+        <div class="glass rounded-2xl p-5 sm:p-7">
+            <form id="clientForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                
+                <!-- Section Header -->
+                <div class="flex justify-between items-center pb-2 border-b border-white/10 mb-4">
+                    <h2 class="text-amber-400 font-bold text-base flex items-center gap-2">
+                        <i class="fa-solid fa-address-card"></i> 填寫新客戶基本資料
+                    </h2>
+                    <span class="text-[11px] text-slate-400">* 標記為必填項</span>
+                </div>
+
+                <!-- Client Name & Nickname -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">客戶姓名 *</label>
+                        <input id="inputName" required type="text" placeholder="例如：陳大明" class="input-field w-full rounded-xl px-3.5 py-3 text-white text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">發信暱稱 (選填)</label>
+                        <input id="inputNickname" type="text" placeholder="例如：大明哥 (空白用本名)" class="input-field w-full rounded-xl px-3.5 py-3 text-white text-sm">
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Email 電子信箱 *</label>
+                    <input id="inputEmail" required type="email" placeholder="例如：daming@example.com" class="input-field w-full rounded-xl px-3.5 py-3 text-white text-sm">
+                </div>
+
+                <!-- Birthday Month & Day -->
+                <div class="grid grid-cols-2 gap-3.5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">生日 (月) *</label>
+                        <select id="selectMonth" required class="input-field w-full rounded-xl px-3 py-3 text-white text-sm font-semibold">
+                            <option value="">選擇月份</option>
+                            <option value="1">1 月</option><option value="2">2 月</option><option value="3">3 月</option><option value="4">4 月</option><option value="5">5 月</option>
+                            <option value="6">6 月</option><option value="7">7 月</option><option value="8">8 月</option><option value="9">9 月</option><option value="10">10 月</option>
+                            <option value="11">11 月</option><option value="12">12 月</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">生日 (日) *</label>
+                        <select id="selectDay" required class="input-field w-full rounded-xl px-3 py-3 text-white text-sm font-semibold">
+                            <option value="">請先選月</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Region & Phone -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">所屬區域</label>
+                        <select id="selectRegion" class="input-field w-full rounded-xl px-3 py-3 text-white text-sm">
+                            <option value="台南" selected>台南</option>
+                            <option value="嘉義">嘉義</option>
+                            <option value="高雄">高雄</option>
+                            <option value="屏東">屏東</option>
+                            <option value="台北">台北</option>
+                            <option value="台中">台中</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">手機號碼 (選填)</label>
+                        <input id="inputPhone" type="tel" placeholder="例如：0912-345-678" class="input-field w-full rounded-xl px-3.5 py-3 text-white text-sm">
+                    </div>
+                </div>
+
+                <!-- Company & Dept -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">公司名稱 (選填)</label>
+                        <input id="inputCompany" type="text" placeholder="例如：創峰科技" class="input-field w-full rounded-xl px-3.5 py-3 text-white text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">服務通訊處 (選填)</label>
+                        <input id="inputDept" type="text" placeholder="例如：台南特區通訊處" class="input-field w-full rounded-xl px-3.5 py-3 text-white text-sm">
+                    </div>
+                </div>
+
+                <!-- Note -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">備註/喜好 (選填)</label>
+                    <input id="inputNote" type="text" placeholder="例如：VIP客戶 / 喜歡喝拿鐵" class="input-field w-full rounded-xl px-3.5 py-3 text-white text-sm">
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-3">
+                    <button id="submitBtn" type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-[0.99] text-black font-black py-4 rounded-xl transition shadow-lg text-base flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
+                        <span id="submitBtnText">一鍵寫入雲端 Google 試算表</span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- QR Code & Mobile Shortcut Tip Card -->
+        <div class="glass rounded-2xl p-5 text-center space-y-4">
+            <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-qrcode"></i> 手機加到主畫面，點開即用
+            </h3>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <div id="qrcode" class="bg-white p-2.5 rounded-xl shadow-md"></div>
+                <div class="text-left text-xs text-slate-300 space-y-2 max-w-xs leading-relaxed">
+                    <p>📱 <strong>手機相機掃描左側 QR Code</strong>，即可在手機開啟本表單。</p>
+                    <p>💡 點擊手機瀏覽器選單 ➔ 選擇「<strong>加入主畫面</strong>」，即可變身為桌面 App 圖示！</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── TAB 2: SETTINGS & GAS CODE ── -->
+    <div id="tabSettings" class="hidden space-y-6">
+
+        <!-- GAS Web App URL Config Box -->
+        <div class="glass border-amber-500/30 rounded-2xl p-5 sm:p-7 space-y-4">
+            <div class="flex items-center gap-2 text-amber-400 font-bold text-base">
+                <i class="fa-solid fa-link"></i> ⚙️ 方案 A：綁定您的個人 GAS 雲端網址
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                貼入您在 Google 試算表部署獲得的 **Web 應用程式 URL**。此網址會安全地保存在您手機的記憶體中，絕不上傳給其他人！
+            </p>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1.5">您的 GAS Web App URL 網址：</label>
+                <input id="gasUrlInput" type="text" placeholder="https://script.google.com/macros/s/AKfycb.../exec" class="input-field w-full rounded-xl px-3.5 py-3 text-white text-xs font-mono">
+            </div>
+
+            <div class="flex flex-wrap gap-2.5 pt-1">
+                <button onclick="saveGasUrl()" class="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-floppy-disk"></i> 儲存設定到手機
+                </button>
+                <button onclick="clearGasUrl()" class="bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-white py-2.5 px-4 rounded-xl text-xs transition">
+                    清除設定
+                </button>
+            </div>
+        </div>
+
+        <!-- 3 Steps Instructions -->
+        <div class="glass rounded-2xl p-5 sm:p-7">
+            <h2 class="text-amber-400 font-bold mb-4 flex items-center gap-2 text-base">
+                <i class="fa-solid fa-rocket"></i> 3 步驟獲取專屬 Web App 網址
+            </h2>
+
+            <div class="space-y-4 text-xs leading-relaxed text-slate-300">
+                <div class="flex items-start gap-3 bg-white/5 p-3.5 rounded-xl border border-white/5">
+                    <div class="w-6 h-6 rounded-full bg-amber-500 text-black font-black flex items-center justify-center flex-shrink-0 text-xs">1</div>
+                    <div>
+                        <span class="font-bold text-white block mb-0.5">貼入二合一 GAS 腳本</span>
+                        開啟您的 Google 試算表 ➔ 選單「擴充功能」➔「Apps Script」，把下方【二合一 GAS 腳本】全部貼上取代並儲存。
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-3 bg-white/5 p-3.5 rounded-xl border border-white/5">
+                    <div class="w-6 h-6 rounded-full bg-amber-500 text-black font-black flex items-center justify-center flex-shrink-0 text-xs">2</div>
+                    <div>
+                        <span class="font-bold text-white block mb-0.5">部署為 Web 應用程式</span>
+                        點擊右上方藍色「**部署**」➔「**新增部署作業**」➔ 種類選擇「**Web 應用程式**」。<br>
+                        ⚠️ **重要設定**：【誰可以存取】請務必選擇「**所有人 (Anyone)**」！
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-3 bg-white/5 p-3.5 rounded-xl border border-white/5">
+                    <div class="w-6 h-6 rounded-full bg-amber-500 text-black font-black flex items-center justify-center flex-shrink-0 text-xs">3</div>
+                    <div>
+                        <span class="font-bold text-white block mb-0.5">複製 URL 並貼回上方</span>
+                        部署完成後複製獲得的網址 (以 `/exec` 結尾)，貼回上面的「綁定您的個人 GAS 雲端網址」框中點擊儲存！
+                    </div>
+                </div>
+            </div>
+
+            <!-- GAS Code Block -->
+            <div class="mt-6">
+                <div class="flex justify-between items-center bg-slate-900 border-t border-x border-slate-700/60 rounded-t-xl px-4 py-2.5">
+                    <span class="text-xs text-slate-400 font-mono"><i class="fa-brands fa-js mr-1.5 text-yellow-400"></i>二合一 GAS 腳本 (doPost + 自動發信)</span>
+                    <button onclick="copyGasScript()" class="text-xs bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-3 py-1 rounded-lg transition"><i class="fa-regular fa-copy mr-1"></i>複製完整腳本</button>
+                </div>
+                <textarea id="fullGasScript" readonly class="w-full h-80 bg-slate-950 border border-slate-700/60 rounded-b-xl p-4 text-xs font-mono text-slate-300 leading-relaxed resize-none focus:outline-none"></textarea>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass border-emerald-500/40 bg-slate-900 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
+        <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-3xl">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <h3 class="text-xl font-black text-white">成功寫入雲端！</h3>
+        <p id="successMessage" class="text-xs text-slate-300 leading-relaxed">
+            新客戶已成功新增至您的 Google 試算表，自動排定狀態為「排程中」。
+        </p>
+        <button onclick="closeSuccessModal()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3 rounded-xl transition text-sm">
+            繼續新增下一筆客戶
+        </button>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// LOCALSTORAGE & STATE
+// ═══════════════════════════════════════════════
+const STORAGE_KEY = 'afu_gas_url';
+
+document.addEventListener('DOMContentLoaded', () => {
+    initMonthDaySelect();
+    loadSavedGasUrl();
+    generateQrCode();
+    populateGasScriptCode();
+});
+
+function switchTab(tab) {
+    document.getElementById('tabForm').classList.toggle('hidden', tab !== 'form');
+    document.getElementById('tabSettings').classList.toggle('hidden', tab !== 'settings');
+    document.getElementById('tabFormBtn').classList.toggle('active', tab === 'form');
+    document.getElementById('tabSettingsBtn').classList.toggle('active', tab === 'settings');
+}
+
+// ═══════════════════════════════════════════════
+// MONTH & DAY SELECTOR
+// ═══════════════════════════════════════════════
+const selMonth = document.getElementById('selectMonth');
+const selDay   = document.getElementById('selectDay');
+
+selMonth.addEventListener('change', updateDays);
+
+function initMonthDaySelect() {
+    updateDays();
+}
+
+function updateDays() {
+    const m = parseInt(selMonth.value);
+    selDay.innerHTML = '';
+    if (!m) {
+        selDay.innerHTML = '<option value="">請先選月</option>';
+        return;
+    }
+    const max = new Date(2000, m, 0).getDate();
+    for (let i = 1; i <= max; i++) {
+        const opt = new Option(`${i} 日`, i);
+        if (i === 15) opt.selected = true;
+        selDay.appendChild(opt);
+    }
+}
+
+// ═══════════════════════════════════════════════
+// GAS URL CONFIG (SCHEME A)
+// ═══════════════════════════════════════════════
+function getSavedGasUrl() {
+    return localStorage.getItem(STORAGE_KEY) || '';
+}
+
+function loadSavedGasUrl() {
+    const savedUrl = getSavedGasUrl();
+    document.getElementById('gasUrlInput').value = savedUrl;
+    updateStatusBanner(savedUrl);
+}
+
+function saveGasUrl() {
+    const url = document.getElementById('gasUrlInput').value.trim();
+    if (!url) {
+        alert('請輸入有效的 GAS Web App URL 網址！');
+        return;
+    }
+    if (!url.startsWith('http')) {
+        alert('網址格式不正確，應以 https:// 開頭');
+        return;
+    }
+    localStorage.setItem(STORAGE_KEY, url);
+    updateStatusBanner(url);
+    alert('✅ 成功儲存 GAS 網址！以後在此手機開啟表單即可直接傳送！');
+    switchTab('form');
+}
+
+function clearGasUrl() {
+    if (confirm('確定要清除手機保存的 GAS 網址嗎？')) {
+        localStorage.removeItem(STORAGE_KEY);
+        document.getElementById('gasUrlInput').value = '';
+        updateStatusBanner('');
+    }
+}
+
+function updateStatusBanner(url) {
+    const banner = document.getElementById('urlStatusBanner');
+    const icon = document.getElementById('statusIcon');
+    const title = document.getElementById('statusTitle');
+    const desc = document.getElementById('statusDesc');
+
+    if (url) {
+        banner.className = "glass border-emerald-500/30 bg-emerald-950/20 rounded-2xl p-4 flex items-center justify-between gap-3 text-xs";
+        icon.className = "fa-solid fa-circle-check text-emerald-400 text-base flex-shrink-0";
+        title.className = "font-bold text-emerald-300 block";
+        title.textContent = "已綁定個人雲端試算表";
+        desc.textContent = "資料將直接發送至您的專屬 Google 試算表。";
+    } else {
+        banner.className = "glass border-amber-500/30 bg-amber-950/20 rounded-2xl p-4 flex items-center justify-between gap-3 text-xs";
+        icon.className = "fa-solid fa-circle-exclamation text-amber-400 text-base flex-shrink-0";
+        title.className = "font-bold text-amber-300 block";
+        title.textContent = "尚未設定 Google 雲端網址";
+        desc.textContent = "請先切換至「GAS 網址與教學」頁籤貼入網址。";
+    }
+}
+
+// ═══════════════════════════════════════════════
+// FORM SUBMIT HANDLER (SEND TO GAS WEB APP)
+// ═══════════════════════════════════════════════
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    const gasUrl = getSavedGasUrl();
+
+    if (!gasUrl) {
+        alert('⚠️ 您尚未設定 GAS 雲端網址！請先切換至設定頁籤貼入網址。');
+        switchTab('settings');
+        return;
+    }
+
+    const name     = document.getElementById('inputName').value.trim();
+    const nickname = document.getElementById('inputNickname').value.trim();
+    const email    = document.getElementById('inputEmail').value.trim();
+    const bM       = document.getElementById('selectMonth').value;
+    const bD       = document.getElementById('selectDay').value;
+    const region   = document.getElementById('selectRegion').value;
+    const phone    = document.getElementById('inputPhone').value.trim();
+    const company  = document.getElementById('inputCompany').value.trim();
+    const dept     = document.getElementById('inputDept').value.trim();
+    const note     = document.getElementById('inputNote').value.trim();
+
+    const payload = {
+        name, nickname, company, dept, phone, email, region, bM, bD, note
+    };
+
+    const submitBtn = document.getElementById('submitBtn');
+    const submitBtnText = document.getElementById('submitBtnText');
+    submitBtn.disabled = true;
+    submitBtnText.textContent = "⏳ 寫入雲端中...";
+
+    try {
+        await fetch(gasUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        // 成功寫入
+        document.getElementById('successMessage').textContent = `客戶「${nickname || name}」已成功新增至您的 Google 試算表！`;
+        document.getElementById('successModal').classList.remove('hidden');
+        
+        // 重置表單
+        document.getElementById('inputName').value = '';
+        document.getElementById('inputNickname').value = '';
+        document.getElementById('inputEmail').value = '';
+        document.getElementById('inputPhone').value = '';
+        document.getElementById('inputNote').value = '';
+
+    } catch (err) {
+        alert('❌ 寫入失敗，請檢查網路連線或 GAS 網址設定是否有誤！\n錯誤細節: ' + err.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtnText.textContent = "一鍵寫入雲端 Google 試算表";
+    }
+}
+
+function closeSuccessModal() {
+    document.getElementById('successModal').classList.add('hidden');
+}
+
+// ═══════════════════════════════════════════════
+// QR CODE GENERATOR
+// ═══════════════════════════════════════════════
+function generateQrCode() {
+    const container = document.getElementById('qrcode');
+    container.innerHTML = '';
+    new QRCode(container, {
+        text: window.location.href,
+        width: 90,
+        height: 90,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+}
+
+// ═══════════════════════════════════════════════
+// DUAL-PURPOSE GAS SCRIPT TEMPLATE
+// ═══════════════════════════════════════════════
+function populateGasScriptCode() {
+    const lines = [
+      '/**',
+      ' * 阿福教練 - 二合一全自動發信與手機 Web API 腳本',
+      ' * 請將此腳本完整貼入 Google 試算表的 Apps Script 中',
+      ' */',
+      '',
+      '// 1. 業務員簽名檔與個人化設定',
+      'const AGENT_CONFIG = {',
+      '  senderName: "阿福教練｜流日能量關懷", // 客戶收件匣看到的寄件者名稱',
+      '  name: "阿福教練",',
+      '  dept: "大勝阿福通",',
+      '  phone: "0988-777-666",',
+      '  lineUrl: "https://line.me/ti/p/~afu168"',
+      '};',
+      '',
+      '// 2. 接收手機 03_Card 表單送出的 POST 資料',
+      'function doPost(e) {',
+      '  try {',
+      '    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();',
+      '    const data = JSON.parse(e.postData.contents);',
+      '    ',
+      '    const row = [',
+      '      data.name || "",',
+      '      data.nickname || "",',
+      '      data.company || "",',
+      '      data.dept || "",',
+      '      data.phone || "",',
+      '      data.email || "",',
+      '      data.region || "其他",',
+      '      parseInt(data.bM) || 1,',
+      '      parseInt(data.bD) || 1,',
+      '      data.note || "",',
+      '      "排程中", // 自動將狀態設為排程中',
+      '      0,        // 發送進度從 0 開始',
+      '      ""        // 最後發送日期留空',
+      '    ];',
+      '    ',
+      '    sheet.appendRow(row);',
+      '    return ContentService.createTextOutput(JSON.stringify({result: "success"}))',
+      '      .setMimeType(ContentService.MimeType.JSON);',
+      '  } catch (err) {',
+      '    return ContentService.createTextOutput(JSON.stringify({result: "error", error: err.toString()}))',
+      '      .setMimeType(ContentService.MimeType.JSON);',
+      '  }',
+      '}',
+      '',
+      '// 3. 每日自動執行觸發點 (手動執行此函式一次完成安檢鬧鐘)',
+      'function setupDailyTrigger() {',
+      '  const triggers = ScriptApp.getProjectTriggers();',
+      '  triggers.forEach(function(t) { ScriptApp.deleteTrigger(t); });',
+      '  ',
+      '  ScriptApp.newTrigger("dailyCheckAndSend")',
+      '    .timeBased()',
+      '    .everyDays(1)',
+      '    .atHour(8)',
+      '    .create();',
+      '    ',
+      '  Logger.log("✅ 每日 08:00 自動發信觸發器安裝成功！");',
+      '}',
+      '',
+      '// 4. 每日定時檢查試算表與發信核心邏輯',
+      'function dailyCheckAndSend() {',
+      '  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();',
+      '  const data = sheet.getDataRange().getValues();',
+      '  if (data.length <= 1) return;',
+      '',
+      '  const today = new Date();',
+      '  const tY = today.getFullYear();',
+      '  const tM = today.getMonth() + 1;',
+      '  const tD = today.getDate();',
+      '  const todayStr = tY + "-" + tM + "-" + tD;',
+      '',
+      '  for (let i = 1; i < data.length; i++) {',
+      '    const row = data[i];',
+      '    const name = row[0];',
+      '    const nickname = row[1];',
+      '    const email = row[5];',
+      '    const bM = parseInt(row[7]);',
+      '    const bD = parseInt(row[8]);',
+      '    let status = row[10];',
+      '    let progress = parseInt(row[11]) || 0;',
+      '    let lastDate = row[12];',
+      '',
+      '    if (!name || !email || !bM || !bD) continue;',
+      '    if (status === "暫停" || status === "已完成") continue;',
+      '    if (lastDate === todayStr) continue;',
+      '',
+      '    const displayName = (nickname && String(nickname).trim()) ? String(nickname).trim() : name;',
+      '',
+      '    if (tM === bM && tD === bD && progress === 0) {',
+      '      const py = getPY(tY, tM, bM, bD);',
+      '      const subject = "🎂 祝 " + displayName + " 生日快樂！給您的專屬流年祝福與能量禮物 🌟";',
+      '      const html = getBirthdayHtml(displayName, py, AGENT_CONFIG);',
+      '      MailApp.sendEmail({ to: email, subject: subject, htmlBody: html, name: AGENT_CONFIG.senderName || AGENT_CONFIG.name });',
+      '      sheet.getRange(i + 1, 11).setValue("發送中");',
+      '      sheet.getRange(i + 1, 12).setValue(1);',
+      '      sheet.getRange(i + 1, 13).setValue(todayStr);',
+      '      continue;',
+      '    }',
+      '',
+      '    if (progress >= 1 && progress <= 7) {',
+      '      const py = getPY(tY, tM, bM, bD);',
+      '      const pm = getPM(py, tM);',
+      '      const pd = getPD(pm, tD);',
+      '      const flow = workflowData[pd];',
+      '      const subject = "🌟 【流日" + pd + "・" + flow.short + "】給 " + displayName + " 的第 " + progress + " 天能量行動提案：" + flow.subtitle;',
+      '      const html = getFlowDayHtml(progress, displayName, pd, flow, AGENT_CONFIG);',
+      '      MailApp.sendEmail({ to: email, subject: subject, htmlBody: html, name: AGENT_CONFIG.senderName || AGENT_CONFIG.name });',
+      '      const nextProgress = progress + 1;',
+      '      const nextStatus = nextProgress > 7 ? "已完成" : "發送中";',
+      '      sheet.getRange(i + 1, 11).setValue(nextStatus);',
+      '      sheet.getRange(i + 1, 12).setValue(nextProgress);',
+      '      sheet.getRange(i + 1, 13).setValue(todayStr);',
+      '    }',
+      '  }',
+      '}',
+      '',
+      'function dr(n) { return n === 0 ? 0 : (n - 1) % 9 + 1; }',
+      'function getPY(tY, tM, bM, bD) { return dr((tM < bM ? tY - 1 : tY) + bM + bD); }',
+      'function getPM(pY, cM) { return dr(pY + cM); }',
+      'function getPD(pM, cD) { return dr(pM + cD); }',
+      '',
+      'const workflowData = {',
+      '  1:{name:"破局與開創日",subtitle:"舒適圈粉碎",short:"破局",tagline:"不用等待許可，今天你就是自己生命中最強大的貴人！",quote:"「在猶豫中等待機會，不如用勇敢劈開第一道曙光！今天不設限，我的獨立與果斷，就是最強大的開創磁場。」",tip:"眼前的機會絕不猶豫，今天必須拿出勇氣、獨立出擊，播下最勇敢的種子。",checklist:["今天有沒有做一件平時最不敢做的勇敢嘗試？","面對機會，有沒有當機立斷「立刻行動」？"]},',
+      '  2:{name:"借力與傾聽日",subtitle:"溫柔凝聚力",short:"借力",tagline:"收起鋒芒、張開雙耳。學會借力，才是最高明的大格局。",quote:"「平時靠實力，今天靠魅力與聽力。縮小自己、放大對方，用最高級的溫柔凝聚全宇宙的人脈複利！」",tip:"今天最強大的力量，是靜靜傾聽對方說的每一句話。",checklist:["今天有沒有忍住說話衝動，好好把對方的話聽完？","有沒有真誠表達感謝，讓對方感受到被重視？"]},',
+      '  3:{name:"表達與促成日",subtitle:"創意渲染力",short:"促成",tagline:"用創意的糖衣，包裹理性的專業；你的快樂就是最強大的促成力！",quote:"「不嚴肅、不糾結！今天我是自己舞台的發表者，用最陽光的笑容去利他，把熱情化為現實的黃金成果。」",tip:"今天的你，就是最有感染力的那個人。展現快樂，就能感染身邊所有人！",checklist:["今天有沒有釋放出樂觀、喜悅的正向能量？","面對卡關，有沒有用幽默或創意的方式嘗試突破？"]},',
+      '  4:{name:"務實與扎根日",subtitle:"信任落地方案",short:"扎根",tagline:"不給模糊承諾，答應的事精準做到；用無懈可擊的誠信築起護城河！",quote:"「今天不浮誇、不浮躁！用最扎實的行動與誠信，將善緣化為最讓人安心的長久關係。」",tip:"今天做的每一件踏實小事，都是未來最穩固的基石。",checklist:["今天答應別人的事，有沒有精準做到，不留模糊空間？","待辦事項和重要環境，今天是否有確實整理？"]},',
+      '  5:{name:"跨界與突破日",subtitle:"打破舒適圈",short:"擴張",tagline:"守成就是最大的風險！帶著破局之翼，讓遠大願景飛越一切限制。",quote:"「拒絕無效瞎忙，大膽打破現狀！今天我不設限，我的勇敢與跨界，就是最強大的擴張磁場。」",tip:"今天做一件讓自己稍微不舒服但充滿可能性的新嘗試！",checklist:["今天有沒有主動走向新環境或接觸新朋友？","有沒有拒絕一件低效的事，把時間留給真正重要的目標？"]},',
+      '  6:{name:"擔當與修復日",subtitle:"智慧與大愛",short:"修復",tagline:"用一肩扛起責任的肩膀修復卡關；你的擔當，就是最療癒的磁場！",quote:"「不怕麻煩、主動站出來！用超越期待的責任心，將眼前的困境轉化為彼此一輩子的深厚信任。」",tip:"今天用愛與責任修復所有卡關，你的擔當就是最美的力量。",checklist:["面對難題，有沒有第一時間勇敢說「我來處理」？","今天有沒有讓身邊焦慮的人，因自己而重獲平靜？"]},',
+      '  7:{name:"底層邏輯與請益日",subtitle:"軍師智慧",short:"貴人",tagline:"用清晰的眼光看透真相；以謙遜請益，借力生命中的頂級貴人。",quote:"「今天不盲從、不浮躁！退回大後方深度整理，我的清明與深度，就是吸引最強高階貴人的磁場。」",tip:"今天把時間留給深度思考，一個清晰的決策，勝過百個倉促的行動。",checklist:["今天有沒有用邏輯與理性做重要決定？","有沒有主動向比自己厲害的人學習或請益？"]},',
+      '  8:{name:"主導與顯化日",subtitle:"黃金收割",short:"收割",tagline:"理直氣壯展現自己！換上戰袍，完成最高規格的豐盛顯化。",quote:"「收起不好意思的心態！今天用最強大的領袖氣場與利他心，理直氣壯地將善緣轉化為實質的豐盛果實。」",tip:"今天換上自信的戰袍，大聲說出自己的價值！你值得擁有最好的。",checklist:["今天有沒有展現出自信的氣場，拿回自己的主導權？","有沒有果斷推動一件重要的事，讓它真正落地？"]},',
+      '  9:{name:"圓滿與斷捨離日",subtitle:"奇蹟藍圖",short:"圓滿",tagline:"帶著豁達感恩完美收網；果斷清空記憶體，預約下一個奇蹟！",quote:"「向舊世界優雅告別！今天我不糾結、不留戀，用豁達與純粹利他，迎接下一個大循環的奇蹟新局。」",tip:"今天帶著感恩完美結尾，然後勇敢放手，讓更好的事物到來。",checklist:["今天有沒有把卡關或懸而未決的事，追蹤到底、完美結案？","有沒有勇敢放下一個消耗自己的事物，清空大腦記憶體？"]} ',
+      '};',
+      'const yearKw = ["開創播種","耐心扎根","展現交流","穩定建設","變動拓展","責任服務","學習沉澱","豐收成就","總結重整"];',
+      'const yearDescs = { 1:{d:"嶄新的能量週期正在為您開啟！",w:"願您今年創造屬於您的精彩人生！"}, 2:{d:"這是深耕關係之年。",w:"願您靜待美好的綻放！"}, 3:{d:"這是表達自我之年。",w:"願您用歡笑迎接高光時刻！"}, 4:{d:"腳踏實地的力量是最好的禮物。",w:"願您用誠信創造令人欽佩的成就！"}, 5:{d:"自由與突破是今年最強能量。",w:"願您勇敢飛向更廣闊的天地！"}, 6:{d:"愛是最強大的能量。",w:"願您在給予與被愛中感受幸福！"}, 7:{d:"智慧的大門正為您敞開！",w:"願您成就更深刻的自己！"}, 8:{d:"多年的努力正在迎來美好收穫！",w:"願您大豐收！"}, 9:{d:"圓滿與智慧是今年最動人的能量。",w:"願您優雅迎向生命的嶄新精彩！"} };',
+      '',
+      'function getBirthdayHtml(cn, py, agent) {',
+      '  const theme = yearKw[py-1]; const yd = yearDescs[py];',
+      '  return `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:20px;background-color:#f1f5f9;font-family:\'Microsoft JhengHei\',sans-serif;"><div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.08);"><div style="background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #c026d3 100%);padding:40px 30px;text-align:center;color:#ffffff;"><div style="font-size:48px;margin-bottom:10px;">🎂</div><h1 style="margin:0;font-size:26px;font-weight:800;">祝 ${cn} 生日快樂！</h1></div><div style="padding:35px 30px;color:#334155;line-height:1.8;"><p style="font-size:16px;font-weight:bold;color:#1e293b;margin-top:0;">親愛的 ${cn} 您好：</p><div style="background:#f8fafc;border-left:4px solid #7c3aed;padding:20px;border-radius:8px;margin:25px 0;"><div style="font-size:12px;font-weight:bold;color:#7c3aed;margin-bottom:6px;">✨ 您的年度流年能量洞察</div><div style="font-size:18px;font-weight:bold;color:#1e293b;margin-bottom:10px;">今年您進入「${theme}之年」（流年 ${py}）</div><p style="font-size:14px;color:#475569;margin:0 0 10px 0;">${yd.d}</p><p style="font-size:14px;font-weight:bold;color:#6d28d9;margin:0;">💫 ${yd.w}</p></div></div><div style="background:#0f172a;padding:25px 30px;color:#f8fafc;border-top:3px solid #fbbf24;"><table style="width:100%;"><tr><td><div style="font-size:18px;font-weight:bold;color:#fbbf24;">${agent.name}</div><div style="font-size:13px;color:#94a3b8;">${agent.dept}</div><div style="font-size:13px;color:#cbd5e1;">📱 手機：${agent.phone}</div></td><td style="text-align:right;"><a href="${agent.lineUrl}" target="_blank" style="background:#22c55e;color:#fff;text-decoration:none;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:bold;">LINE 諮詢 / 預約</a></td></tr></table></div></div></body></html>`;',
+      '}',
+      '',
+      'function getFlowDayHtml(n, cn, pd, flow, agent) {',
+      '  const cl = (flow.checklist||[]).map(c=>`<li style="margin-bottom:6px;">${c}</li>`).join(\'\');',
+      '  return `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:20px;background-color:#f1f5f9;font-family:\'Microsoft JhengHei\',sans-serif;"><div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.08);"><div style="background:#1e293b;padding:14px 25px;color:#cbd5e1;font-size:13px;display:flex;justify-content:space-between;align-items:center;"><span>📅 第 ${n} 則・流日能量關懷訊息</span><span style="background:#f59e0b;color:#000;padding:2px 10px;border-radius:12px;font-weight:bold;">流日 ${pd}・${flow.short}</span></div><div style="background:linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);padding:35px 30px;color:#ffffff;"><div style="font-size:13px;color:#fbbf24;font-weight:bold;">【${flow.name}】${flow.subtitle}</div><h1 style="margin:6px 0 12px 0;font-size:22px;font-weight:800;color:#ffffff;">${flow.tagline}</h1><div style="font-size:14px;color:#cbd5e1;font-style:italic;border-left:3px solid #fbbf24;padding-left:12px;">${flow.quote}</div></div><div style="padding:30px;color:#334155;line-height:1.8;"><p style="font-size:15px;margin-top:0;">嗨 <strong>${cn}</strong> 您好：</p><div style="background:#fffbeb;border:1px solid #fef3c7;padding:18px;border-radius:12px;margin:20px 0;"><div style="font-size:13px;font-weight:bold;color:#b45309;margin-bottom:4px;">💡 今日能量提醒</div><div style="font-size:14px;color:#78350f;">${flow.tip}</div></div><div style="background:#f0fdf4;border:1px solid #dcfce7;padding:18px;border-radius:12px;margin-bottom:25px;"><div style="font-size:13px;font-weight:bold;color:#15803d;margin-bottom:8px;">🧭 夜間 21:00 執行檢視提案</div><ul style="margin:0;padding-left:20px;font-size:14px;color:#166534;">${cl}</ul></div></div><div style="background:#0f172a;padding:25px 30px;color:#f8fafc;border-top:3px solid #fbbf24;"><table style="width:100%;"><tr><td><div style="font-size:18px;font-weight:bold;color:#fbbf24;">${agent.name}</div><div style="font-size:13px;color:#94a3b8;">${agent.dept}</div><div style="font-size:13px;color:#cbd5e1;">📱 手機：${agent.phone}</div></td><td style="text-align:right;"><a href="${agent.lineUrl}" target="_blank" style="background:#22c55e;color:#fff;text-decoration:none;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:bold;">LINE 諮詢 / 預約</a></td></tr></table></div></div></body></html>`;',
+      '}'
+    ];
+
+    document.getElementById('fullGasScript').value = lines.join('\n');
+}
+
+function copyGasScript() {
+    const el = document.getElementById('fullGasScript');
+    el.select();
+    document.execCommand('copy');
+    alert('已成功複製二合一 GAS 腳本！請貼入 Apps Script 並「部署為 Web 應用程式」。');
+}
+</script>
+</body>
+</html>

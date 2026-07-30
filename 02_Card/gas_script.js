@@ -5,6 +5,7 @@
 
 // 1. 業務員簽名檔與個人化設定 (請修改為您的資訊)
 const AGENT_CONFIG = {
+  senderName: "阿福教練｜流日能量關懷", // 客戶收件匣看到的寄件者顯示名稱
   name: "阿福教練",
   dept: "富邦人壽 嘉義興業通訊處",
   phone: "0988-777-666",
@@ -68,7 +69,12 @@ function dailyCheckAndSend() {
       const subject = `🎂 祝 ${displayName} 生日快樂！給您的專屬流年祝福與能量禮物 🌟`;
       const html = getBirthdayHtml(displayName, py, AGENT_CONFIG);
       
-      MailApp.sendEmail({ to: email, subject: subject, htmlBody: html });
+      MailApp.sendEmail({
+        to: email,
+        subject: subject,
+        htmlBody: html,
+        name: AGENT_CONFIG.senderName || AGENT_CONFIG.name
+      });
       
       // 更新試算表狀態
       sheet.getRange(i + 1, 11).setValue("發送中");
@@ -87,7 +93,12 @@ function dailyCheckAndSend() {
       const subject = `🌟 【流日${pd}・${flow.short}】給 ${displayName} 的第 ${progress} 天能量行動提案：${flow.subtitle}`;
       const html = getFlowDayHtml(progress, displayName, pd, flow, AGENT_CONFIG);
 
-      MailApp.sendEmail({ to: email, subject: subject, htmlBody: html });
+      MailApp.sendEmail({
+        to: email,
+        subject: subject,
+        htmlBody: html,
+        name: AGENT_CONFIG.senderName || AGENT_CONFIG.name
+      });
 
       // 更新進度
       const nextProgress = progress + 1;

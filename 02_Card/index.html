@@ -165,12 +165,16 @@
                 </div>
             </div>
 
-            <!-- Section 2: Agent Info (Signature) -->
+            <!-- Section 2: Agent Info (Signature & Sender Name) -->
             <div class="border-t border-white/10 pt-6 mb-6">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                    <i class="fa-solid fa-signature text-amber-500"></i> 業務員個人簽名檔設定
+                    <i class="fa-solid fa-signature text-amber-500"></i> 業務員個人簽名檔與寄件者名稱設定
                 </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">寄件者顯示名稱 *</label>
+                        <input id="agentSenderName" type="text" value="阿福教練｜流日能量關懷" placeholder="客戶收件匣看到的名稱" class="input-field w-full rounded-xl px-3.5 py-2.5 text-white text-sm">
+                    </div>
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">業務員姓名 *</label>
                         <input id="agentName" type="text" value="阿福教練" class="input-field w-full rounded-xl px-3.5 py-2.5 text-white text-sm">
@@ -205,10 +209,17 @@
                 <div id="msgSelector" class="flex flex-wrap gap-1.5 bg-black/40 p-1.5 rounded-xl border border-white/10"></div>
             </div>
 
-            <!-- Email Subject Bar -->
-            <div class="bg-slate-900 border border-slate-700/60 rounded-xl px-4 py-3 mb-4 flex items-center gap-3 text-xs md:text-sm">
-                <span class="text-slate-500 font-bold">主旨：</span>
-                <span id="emailSubject" class="text-slate-200 font-semibold truncate"></span>
+            <!-- Email Header Info Bar -->
+            <div class="bg-slate-900 border border-slate-700/60 rounded-xl p-3 mb-4 space-y-2 text-xs md:text-sm">
+                <div class="flex items-center gap-3">
+                    <span class="text-slate-500 font-bold w-16 text-right flex-shrink-0">寄件人：</span>
+                    <span id="emailSenderName" class="text-amber-400 font-bold"></span>
+                    <span class="text-slate-500 text-xs">&lt;your-gmail@gmail.com&gt;</span>
+                </div>
+                <div class="flex items-center gap-3 border-t border-slate-800 pt-2">
+                    <span class="text-slate-500 font-bold w-16 text-right flex-shrink-0">主旨：</span>
+                    <span id="emailSubject" class="text-slate-200 font-semibold truncate"></span>
+                </div>
             </div>
 
             <!-- Email Render Iframe -->
@@ -377,6 +388,7 @@ function renderAll() {
     const bD = parseInt(selDay.value) || 15;
 
     const agent = {
+        senderName: document.getElementById('agentSenderName').value.trim() || '阿福教練｜流日能量關懷',
         name: document.getElementById('agentName').value.trim() || '阿福教練',
         dept: document.getElementById('agentDept').value.trim() || '富邦人壽 嘉義興業通訊處',
         phone: document.getElementById('agentPhone').value.trim() || '0988-777-666',
@@ -441,6 +453,8 @@ function renderSelectorPills() {
 function showPreview(idx) {
     const email = generatedEmails[idx];
     if (!email) return;
+    const senderName = document.getElementById('agentSenderName').value.trim() || '阿福教練｜流日能量關懷';
+    document.getElementById('emailSenderName').textContent = senderName;
     document.getElementById('emailSubject').textContent = email.subject;
     const frame = document.getElementById('emailFrame');
     const doc = frame.contentDocument || frame.contentWindow.document;
@@ -449,51 +463,95 @@ function showPreview(idx) {
     doc.close();
 }
 
-// ═══════════════════════════════════════════════
-// HTML EMAIL TEMPLATES
-// ═══════════════════════════════════════════════
-function getBirthdayHtml(cn, py, agent) {
-    const theme = yearKw[py-1];
-    const yd    = yearDescs[py];
-    return `<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"></head>
-<body style="margin:0;padding:20px;background-color:#f1f5f9;font-family:'Microsoft JhengHei',sans-serif;">
-  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.08);">
+// 2. 每日自動執行觸發點 (請手動執行此函式一次即可完成安裝)
+function setupDailyTrigger() {
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(t => ScriptApp.deleteTrigger(t));
+  
+  ScriptApp.newTrigger('dailyCheckAndSend')
+    .timeBased()
+    .everyDays(1)
+    .atHour(8)
+    .create();
     
-    <!-- Header Card -->
-    <div style="background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #c026d3 100%);padding:40px 30px;text-align:center;color:#ffffff;">
-      <div style="font-size:48px;margin-bottom:10px;">🎂</div>
-      <h1 style="margin:0;font-size:26px;font-weight:800;letter-spacing:1px;">祝 ${cn} 生日快樂！</h1>
-      <p style="margin:8px 0 0 0;font-size:14px;opacity:0.9;">這一天是屬於您的特別日子，獻上最真摯的祝福 🌟</p>
-    </div>
+  Logger.log("✅ 每日 08:00 自動發信觸發器安裝成功！");
+}
 
-    <!-- Content Card -->
-    <div style="padding:35px 30px;color:#334155;line-height:1.8;">
-      <p style="font-size:16px;font-weight:bold;color:#1e293b;margin-top:0;">親愛的 ${cn} 您好：</p>
-      <p style="font-size:15px;">在這個溫馨的日子裡，祝您生日快樂、身體健康、萬事順心！</p>
+// 3. 核心處理邏輯：檢查試算表並發信
+function dailyCheckAndSend() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return;
+
+  const today = new Date();
+  const tY = today.getFullYear();
+  const tM = today.getMonth() + 1;
+  const tD = today.getDate();
+  const todayStr = \`\${tY}-\${tM}-\${tD}\`;
+
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    const name = row[0];        // A: 客戶姓名
+    const nickname = row[1];    // B: 客戶暱稱
+    const email = row[5];       // F: Email
+    const bM = parseInt(row[7]);// H: 生日月
+    const bD = parseInt(row[8]);// I: 生日日
+    let status = row[10];       // K: 自動發送狀態
+    let progress = parseInt(row[11]) || 0; // L: 當前發送進度
+    let lastDate = row[12];     // M: 最後發送日期
+
+    if (!name || !email || !bM || !bD) continue;
+    if (status === "暫停" || status === "已完成") continue;
+    if (lastDate === todayStr) continue;
+
+    const displayName = (nickname && String(nickname).trim()) ? String(nickname).trim() : name;
+
+    // 檢查狀況 1：今天是否生日？ -> 寄發第 0 則生日卡
+    if (tM === bM && tD === bD && progress === 0) {
+      const py = getPY(tY, tM, bM, bD);
+      const subject = \`🎂 祝 \${displayName} 生日快樂！給您的專屬流年祝福與能量禮物 🌟\`;
+      const html = getBirthdayHtml(displayName, py, AGENT_CONFIG);
       
-      <!-- Energy Box -->
-      <div style="background:#f8fafc;border-left:4px solid #7c3aed;padding:20px;border-radius:8px;margin:25px 0;">
-        <div style="font-size:12px;font-weight:bold;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">✨ 您的年度流年能量洞察</div>
-        <div style="font-size:18px;font-weight:bold;color:#1e293b;margin-bottom:10px;">今年您進入「${theme}之年」（流年 ${py}）</div>
-        <p style="font-size:14px;color:#475569;margin:0 0 10px 0;">${yd.d}</p>
-        <p style="font-size:14px;font-weight:bold;color:#6d28d9;margin:0;">💫 ${yd.w}</p>
-      </div>
+      MailApp.sendEmail({
+        to: email,
+        subject: subject,
+        htmlBody: html,
+        name: AGENT_CONFIG.senderName || AGENT_CONFIG.name
+      });
+      
+      sheet.getRange(i + 1, 11).setValue("發送中");
+      sheet.getRange(i + 1, 12).setValue(1);
+      sheet.getRange(i + 1, 13).setValue(todayStr);
+      continue;
+    }
 
-      <p style="font-size:15px;">感謝您一直以來的信任與支持，有任何需要協助的地方，隨時歡迎與我聯繫！</p>
-    </div>
+    // 檢查狀況 2：連續 7 天流日發送 (進度 1~7)
+    if (progress >= 1 && progress <= 7) {
+      const py = getPY(tY, tM, bM, bD);
+      const pm = getPM(py, tM);
+      const pd = getPD(pm, tD);
+      const flow = workflowData[pd];
 
-    <!-- Agent Signature Box -->
-    <div style="background:#0f172a;padding:25px 30px;color:#f8fafc;border-top:3px solid #fbbf24;">
-      <table style="width:100%;border-collapse:collapse;">
-        <tr>
-          <td>
-            <div style="font-size:18px;font-weight:bold;color:#fbbf24;margin-bottom:4px;">${agent.name}</div>
-            <div style="font-size:13px;color:#94a3b8;margin-bottom:8px;">${agent.dept}</div>
-            <div style="font-size:13px;color:#cbd5e1;">📱 手機：${agent.phone}</div>
-          </td>
-          <td style="text-align:right;vertical-align:bottom;">
+      const subject = \`🌟 【流日\${pd}・\${flow.short}】給 \${displayName} 的第 \${progress} 天能量行動提案：\${flow.subtitle}\`;
+      const html = getFlowDayHtml(progress, displayName, pd, flow, AGENT_CONFIG);
+
+      MailApp.sendEmail({
+        to: email,
+        subject: subject,
+        htmlBody: html,
+        name: AGENT_CONFIG.senderName || AGENT_CONFIG.name
+      });
+
+      const nextProgress = progress + 1;
+      const nextStatus = nextProgress > 7 ? "已完成" : "發送中";
+      
+      sheet.getRange(i + 1, 11).setValue(nextStatus);
+      sheet.getRange(i + 1, 12).setValue(nextProgress);
+      sheet.getRange(i + 1, 13).setValue(todayStr);
+    }
+  }
+}
+`;-align:right;vertical-align:bottom;">
             <a href="${agent.line}" target="_blank" style="display:inline-block;background:#22c55e;color:#ffffff;text-decoration:none;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:bold;">LINE 諮詢 / 預約</a>
           </td>
         </tr>

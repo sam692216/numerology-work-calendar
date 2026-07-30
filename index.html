@@ -495,17 +495,18 @@
             const nextDay = new Date(year, month - 1, day + 1);
             const endDate = formatDateForICS(nextDay.getFullYear(), nextDay.getMonth() + 1, nextDay.getDate());
             const actionString = flow.actions.map(a => `- ${a}`).join('\\n');
+            const checklistString = (flow.checklist || []).map(c => `☐ ${c}`).join('\\n');
+            const quoteBlock = (flow.tagline || flow.quote)
+                ? `\\n\\n🔥 今日能量金句：\\n${flow.tagline || ''}\\n${flow.quote || ''}`
+                : '';
+            const checklistBlock = checklistString
+                ? `\\n\\n🧭 夜間 21:00 執行檢視：\\n${checklistString}`
+                : '';
             const prefix = agentName ? `[${agentName}] ` : '';
             const greeting = agentName ? `嗨 ${agentName}！\\n` : '';
-            const rawDescription = `${greeting}🔢 當日能量：流月 ${pMonth} ✕ 流日 ${pDay}\\n\\n🎯 目標：${flow.goal}\\n\\n📋 行動建議：\\n${actionString}\\n\\n💡 能量提醒：${flow.tip}`;
-            
-            return `BEGIN:VEVENT\r
-DTSTART;VALUE=DATE:${startDate}\r
-DTEND;VALUE=DATE:${endDate}\r
-SUMMARY:${foldLine(`${prefix}【${flow.short}】${flow.name}`)}\r
-DESCRIPTION:${foldLine(rawDescription)}\r
-TRANSP:TRANSPARENT\r
-END:VEVENT\r\n`;
+            const rawDescription = `${greeting}🔢 當日能量：流月 ${pMonth} ✕ 流日 ${pDay}\\n\\n🎯 目標：${flow.goal}\\n\\n📋 行動建議：\\n${actionString}\\n\\n💡 能量提醒：${flow.tip}${quoteBlock}${checklistBlock}`;
+
+            return `BEGIN:VEVENT\r\nDTSTART;VALUE=DATE:${startDate}\r\nDTEND;VALUE=DATE:${endDate}\r\nSUMMARY:${foldLine(`${prefix}【${flow.short}】${flow.name}`)}\r\nDESCRIPTION:${foldLine(rawDescription)}\r\nTRANSP:TRANSPARENT\r\nEND:VEVENT\r\n`;
         }
 
         function downloadICS(content, filename) {

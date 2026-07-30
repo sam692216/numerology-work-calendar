@@ -152,11 +152,32 @@
                     </div>
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">生日 (月) *</label>
-                        <select id="birthMonth" class="input-field w-full rounded-xl px-3.5 py-2.5 text-white text-sm"></select>
+                        <select id="birthMonth" class="input-field w-full rounded-xl px-3.5 py-2.5 text-white text-sm">
+                            <option value="1">1 月</option>
+                            <option value="2">2 月</option>
+                            <option value="3">3 月</option>
+                            <option value="4">4 月</option>
+                            <option value="5">5 月</option>
+                            <option value="6">6 月</option>
+                            <option value="7">7 月</option>
+                            <option value="8" selected>8 月</option>
+                            <option value="9">9 月</option>
+                            <option value="10">10 月</option>
+                            <option value="11">11 月</option>
+                            <option value="12">12 月</option>
+                        </select>
                     </div>
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">生日 (日) *</label>
-                        <select id="birthDay" class="input-field w-full rounded-xl px-3.5 py-2.5 text-white text-sm"></select>
+                        <select id="birthDay" class="input-field w-full rounded-xl px-3.5 py-2.5 text-white text-sm">
+                            <option value="1">1 日</option><option value="2">2 日</option><option value="3">3 日</option><option value="4">4 日</option><option value="5">5 日</option>
+                            <option value="6">6 日</option><option value="7">7 日</option><option value="8">8 日</option><option value="9">9 日</option><option value="10">10 日</option>
+                            <option value="11">11 日</option><option value="12">12 日</option><option value="13">13 日</option><option value="14">14 日</option><option value="15" selected>15 日</option>
+                            <option value="16">16 日</option><option value="17">17 日</option><option value="18">18 日</option><option value="19">19 日</option><option value="20">20 日</option>
+                            <option value="21">21 日</option><option value="22">22 日</option><option value="23">23 日</option><option value="24">24 日</option><option value="25">25 日</option>
+                            <option value="26">26 日</option><option value="27">27 日</option><option value="28">28 日</option><option value="29">29 日</option><option value="30">30 日</option>
+                            <option value="31">31 日</option>
+                        </select>
                     </div>
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">備註</label>
@@ -353,21 +374,20 @@ let generatedEmails = [];
 // ═══════════════════════════════════════════════
 const selMonth = document.getElementById('birthMonth');
 const selDay   = document.getElementById('birthDay');
-for (let i=1;i<=12;i++) selMonth.appendChild(new Option(`${i} 月`,i));
-selMonth.value = "8";
-updateDays();
-selDay.value = "15";
 
 selMonth.addEventListener('change', updateDays);
 document.getElementById('updatePreviewBtn').addEventListener('click', renderAll);
 
 function updateDays() {
-    const m = parseInt(selMonth.value), cur = parseInt(selDay.value);
+    const m = parseInt(selMonth.value), cur = parseInt(selDay.value) || 15;
     selDay.innerHTML = '';
     if (!m) return;
     const max = new Date(2000, m, 0).getDate();
-    for (let i=1;i<=max;i++) selDay.appendChild(new Option(`${i} 日`,i));
-    if (cur && cur<=max) selDay.value = cur;
+    for (let i=1;i<=max;i++) {
+        const opt = new Option(`${i} 日`, i);
+        if (i === Math.min(cur, max)) opt.selected = true;
+        selDay.appendChild(opt);
+    }
 }
 
 function switchTab(tab) {
